@@ -8,10 +8,9 @@ import torch.nn.functional as F
 import torchvision.transforms.functional as trF
 from tensorboardX import SummaryWriter
 
-from UNet import UNet
 from autoencoder import AutoEncoder
 from dataloader import CustomDataLoader
-from Metrics import DiceLoss, MixedLoss
+from metrics import DiceLoss, MixedLoss
 
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
