@@ -24,9 +24,7 @@ class CustomDataset(Dataset):
             ])
             image_tensor = transform(image)
         except:
-            print(image_path)
-            pass
-            # image_tensor = torch.rand(size=(3, 256, 256))
+            image_tensor = torch.rand(size=(3, 256, 256))
         return image_tensor
 
 
