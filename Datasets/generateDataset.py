@@ -3,7 +3,7 @@ import random
 import csv
 
 root_directory = "/home/optimus/Downloads/Dataset/ChestXRays/NIH/images"
-output_directory = "/home/optimus/wiseyak/Chest_XRays/autoencoder_pretraining/"
+output_directory = "/home/optimus/wiseyak/Chest_XRay_Model/autoencoder_pretraining/"
 
 # Get the list of image file names
 image_files = os.listdir(root_directory)
