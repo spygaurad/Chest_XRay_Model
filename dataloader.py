@@ -14,13 +14,16 @@ class CustomDataset(Dataset):
         return len(self.data[:])
 
     def __getitem__(self, index):
-        image_path = self.data.iloc[index, 0]
-        image = Image.open(image_path).convert('RGB')
-        transform = transforms.Compose([
-            transforms.Resize((256, 256)),
-            transforms.ToTensor(),
-        ])
-        image_tensor = transform(image)
+        try:
+            image_path = self.data.iloc[index, 0]
+            image = Image.open(image_path).convert('RGB')
+            transform = transforms.Compose([
+                transforms.Resize((256, 256)),
+                transforms.ToTensor(),
+            ])
+            image_tensor = transform(image)
+        except:
+            image_tensor = torch.rand(size=(1, 3, 256, 256))
         return image_tensor
 
 
