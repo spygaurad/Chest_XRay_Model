@@ -32,9 +32,9 @@ class CustomDataLoader:
         self.batch_size = batch_size
 
     def get_data(self):
-        train_csv = "Datasets/image2image/train.csv"
-        val_csv = "Datasets/image2image/val.csv"
-        test_csv = "Datasets/image2image/test.csv"
+        train_csv = "Datasets/autoencoder_pretraining/train.csv"
+        val_csv = "Datasets/autoencoder_pretraining/val.csv"
+        test_csv = "Datasets/autoencoder_pretraining/test.csv"
 
         train_dataset = CustomDataset(train_csv)
         val_dataset = CustomDataset(val_csv)
