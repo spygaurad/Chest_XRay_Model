@@ -33,7 +33,7 @@ class CustomDataLoader:
 
     def get_data(self):
         train_csv = "Datasets/autoencoder_pretraining/train.csv"
-        val_csv = "Datasets/autoencoder_pretraining/val.csv"
+        val_csv = "Datasets/autoencoder_pretraining/valid.csv"
         test_csv = "Datasets/autoencoder_pretraining/test.csv"
 
         train_dataset = CustomDataset(train_csv)
