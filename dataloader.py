@@ -2,7 +2,7 @@ import os
 import pandas as pd
 import numpy as np
 import torch
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, Dataloader, random_split
 from torchvision import transforms
 from PIL import Image
 
@@ -43,3 +43,38 @@ class ChestXRayDataset(Dataset):
                 label_index = self.class_mapping[label]
                 label_vector[label_index] = 1.0
         return torch.from_numpy(label_vector)
+
+
+
+
+class ChestXRayDataLoader:
+    def __init__(self, dataset, train_percent=0.8, val_percent=0.1, batch_size=32, num_workers=4, seed=42):
+        self.dataset = dataset
+        self.train_percent = train_percent
+        self.val_percent = val_percent
+        self.batch_size = batch_size
+        self.num_workers = num_workers
+        self.seed = seed
+        
+        self.train_loader, self.val_loader, self.test_loader = self._create_data_loaders()
+        
+    def _create_data_loaders(self):
+        # Calculate the number of samples for each split
+        num_samples = len(self.dataset)
+        num_train = int(self.train_percent * num_samples)
+        num_val = int(self.val_percent * num_samples)
+        num_test = num_samples - num_train - num_val
+        
+        # Set the random seed for reproducibility
+        torch.manual_seed(self.seed)
+        
+        # Split the dataset into train, val, and test sets
+        train_set, val_set, test_set = random_split(self.dataset, [num_train, num_val, num_test])
+        
+        # Create the data loaders
+        train_loader = DataLoader(train_set, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers)
+        val_loader = DataLoader(val_set, batch_size=self.batch_size, shuffle=False, num_workers=self.num_workers)
+        test_loader = DataLoader(test_set, batch_size=self.batch_size, shuffle=False, num_workers=self.num_workers)
+        
+        return train_loader, val_loader, test_loader
+
