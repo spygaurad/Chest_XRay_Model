@@ -8,7 +8,7 @@ class ResNet50(nn.Module):
         self.resnet = models.resnet50(pretrained=True)
         self.fc1 = nn.Linear(1000, 512)
         self.fc2 = nn.Linear(512, 64)
-        self.classficationLayer = nn.linear(64, 15)
+        self.classficationLayer = nn.Linear(64, 15)
         # self.classIndexLayer = nn.Linear(64, 10)
         self.relu = nn.ReLU()
         self.sigmoid = nn.Sigmoid()
