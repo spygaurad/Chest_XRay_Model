@@ -78,3 +78,7 @@ class ChestXRayDataLoader:
         
         return train_loader, val_loader, test_loader
 
+    def __get_data():
+        dataset = ChestXRayDataset(csv_file='Data_Entry_2017.csv', image_dir='home/optimus/Downloads/Dataset/ChestXRays/NIH/images/', num_classes=15)
+        train_dataloader, val_dataloader, test_dataloader = ChestXRayDataLoader(dataset, train_percent=0.8, val_percent=0.1, batch_size=64, num_workers=4, seed=42)
+        return train_dataloader, val_dataloader, test_dataloader
