@@ -9,7 +9,7 @@ import torchvision.transforms.functional as trF
 from tensorboardX import SummaryWriter
 
 from network import ResNet50
-from dataloader import ChestXRayDataset
+from dataloader import ChestXRayDataLoader
 from metrics import DiceLoss, MixedLoss
 
 
@@ -143,7 +143,7 @@ class Model():
 
         print(f"Using {DEVICE} device...")
         print("Loading Datasets...")
-        train_data, val_data, test_data = ChestXRayLoader().get_data()
+        train_data, val_data, test_data = ChestXRayDataLoader().get_data()
         print("Dataset Loaded.")
 
         print("Initializing Parameters...")
