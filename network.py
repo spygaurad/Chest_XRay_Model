@@ -8,7 +8,7 @@ class ResNet50(nn.Module):
         self.resnet = models.resnet50(pretrained=True)
         self.fc1 = nn.Linear(1000, 512)
         self.fc2 = nn.Linear(512, 64)
-        self.classficationLayer = nn.linear(64, 10)
+        self.classficationLayer = nn.linear(64, 15)
         # self.classIndexLayer = nn.Linear(64, 10)
         self.relu = nn.ReLU()
         # self.sigmoid = nn.Sigmoid()
@@ -18,7 +18,7 @@ class ResNet50(nn.Module):
         x = self.relu(self.fc2(self.relu(self.fc1(x))))
         return x
 
-inp = torch.rand((1, 3, 256, 256))
-model = ResNet50()
-out = model(inp)
-print(out.shape)
+# inp = torch.rand((1, 3, 256, 256))
+# model = ResNet50()
+# out = model(inp)
+# print(out.shape)
