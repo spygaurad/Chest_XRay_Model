@@ -11,12 +11,12 @@ class ResNet50(nn.Module):
         self.classficationLayer = nn.linear(64, 15)
         # self.classIndexLayer = nn.Linear(64, 10)
         self.relu = nn.ReLU()
-        # self.sigmoid = nn.Sigmoid()
+        self.sigmoid = nn.Sigmoid()
     
     def forward(self, x):
         x = self.resnet(x)
         x = self.relu(self.fc2(self.relu(self.fc1(x))))
-        return x
+        return  self.sigmoid(x)
 
 # inp = torch.rand((1, 3, 256, 256))
 # model = ResNet50()
