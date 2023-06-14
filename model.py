@@ -8,22 +8,22 @@ import torch.nn.functional as F
 import torchvision.transforms.functional as trF
 from tensorboardX import SummaryWriter
 
-from autoencoder import AutoEncoder
-from dataloader import CustomDataLoader
+from network import ResNet50
+from dataloader import ChestXRayDataset
 from metrics import DiceLoss, MixedLoss
 
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # DEVICE = "cpu"
 BATCH_SIZE = 64
-MODEL_NAME = "AutoEncoderSetup"
+MODEL_NAME = "ResNet50"
 large_file_dir = '/mnt/media/wiseyak/Chest_XRays/'
 
 
 class Model():
  
     def __init__(self, trained=False):
-        self.model = AutoEncoder().to(DEVICE)
+        self.model = ResNet50().to(DEVICE)
 
     def psnr(self, reconstructed, original, max_val=1.0): return 20 * torch.log10(max_val / torch.sqrt(F.mse_loss(reconstructed, original)))        
 
