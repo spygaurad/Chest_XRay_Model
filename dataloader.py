@@ -1,53 +1,37 @@
-from torch.utils.data import DataLoader, Dataset
 import pandas as pd
-from PIL import Image
-from torchvision import transforms
+import numpy as np
+import os
 import torch
+from torch.utils.data import Dataset
 
-
-
-class CustomDataset(Dataset):
-
-    def __init__(self, csv_file):
+class ChestXRayDataset(Dataset):
+    def __init__(self, csv_file, image_dir, num_classes):
         self.data = pd.read_csv(csv_file)
-
+        self.image_dir = image_dir
+        self.num_classes = num_classes
+        self.class_mapping = self._create_class_mapping()
+        
     def __len__(self):
-        return len(self.data[:])
-
-    def __getitem__(self, index):
-        try:
-            image_path = self.data.iloc[index, 0]
-            image = Image.open(image_path).convert('RGB')
-            transform = transforms.Compose([
-                transforms.Resize((256, 256)),
-                transforms.ToTensor(),
-            ])
-            image_tensor = transform(image)
-        except:
-            image_tensor = torch.rand(size=(3, 256, 256))
-        return image_tensor
-
-
-
-class CustomDataLoader:
-
-    def __init__(self, batch_size):
-        self.batch_size = batch_size
-
-    def get_data(self):
-        train_csv = "Datasets/autoencoder_pretraining/train.csv"
-        val_csv = "Datasets/autoencoder_pretraining/valid.csv"
-        test_csv = "Datasets/autoencoder_pretraining/test.csv"
-
-        train_dataset = CustomDataset(train_csv)
-        val_dataset = CustomDataset(val_csv)
-        test_dataset = CustomDataset(test_csv)
-
-        train_loader = DataLoader(train_dataset, batch_size=self.batch_size, shuffle=True)
-        val_loader = DataLoader(val_dataset, batch_size=self.batch_size, shuffle=True)
-        test_loader = DataLoader(test_dataset, batch_size=self.batch_size, shuffle=True)
-
-        return train_loader, val_loader, test_loader
-
+        return len(self.data)
     
-# train_data, val_data, test_data = CustomDataLoader(4).get_data()
+    def __getitem__(self, index):
+        row = self.data.iloc[index]
+        image_path = os.path.join(self.image_dir, row['Image Index'])
+        labels = row['Finding Labels'].split('|')
+        label_vector = self._create_label_vector(labels)
+        
+    def _create_class_mapping(self):
+        unique_labels = set()
+        for labels in self.data['Finding Labels'].str.split('|'):
+            unique_labels.update(labels)
+        class_mapping = {label: i for i, label in enumerate(sorted(unique_labels))}
+        return class_mapping
+    
+    def _create_label_vector(self, labels):
+        label_vector = np.zeros(self.num_classes, dtype=np.float32)
+        for label in labels:
+            if label in self.class_mapping:
+                label_index = self.class_mapping[label]
+                label_vector[label_index] = 1.0
+        return torch.from_numpy(label_vector)
+
