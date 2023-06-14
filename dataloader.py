@@ -2,7 +2,7 @@ import os
 import pandas as pd
 import numpy as np
 import torch
-from torch.utils.data import Dataset, Dataloader, random_split
+from torch.utils.data import Dataset, random_split
 from torchvision import transforms
 from PIL import Image
 
