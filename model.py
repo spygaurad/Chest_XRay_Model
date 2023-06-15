@@ -171,7 +171,7 @@ class Model():
         for epoch in range(1, epochs+1):
 
             print(f"Epoch No: {epoch}")
-            train_loss, train_acc = self.train(dataset=train_data, loss_func=mseless, optimizer=optimizer)
+            train_loss, train_acc = self.train(dataset=train_data, loss_func=mseloss, optimizer=optimizer)
             val_acc = self.validate(dataset=val_data)
             test_acc = self.test(dataset=test_data)
             train_loss_epochs.append(train_loss)
