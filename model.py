@@ -9,7 +9,7 @@ import torch.nn.functional as F
 import torchvision.transforms.functional as trF
 from tensorboardX import SummaryWriter
 
-from network import ResNet50
+from network import EfficientNet
 from dataloader import ChestXRayDataLoader
 from metrics import DiceLoss, MixedLoss
 
