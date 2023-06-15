@@ -7,7 +7,7 @@ from torchvision import transforms
 from PIL import Image
 
 class ChestXRayDataset(Dataset):
-    def __init__(self, csv_file, image_dir, num_classes, transform):
+    def __init__(self, csv_file, image_dir, num_classes):
         self.data = pd.read_csv(csv_file)
         self.image_dir = image_dir
         self.num_classes = num_classes
