@@ -16,7 +16,7 @@ class ResNet50(nn.Module):
     def forward(self, x):
         x = self.resnet(x)
         x = self.relu(self.fc2(self.relu(self.fc1(x))))
-        return  self.sigmoid(x)
+        return  self.sigmoid(self.classficationLayer(x))
 
 # inp = torch.rand((1, 3, 256, 256))
 # model = ResNet50()
