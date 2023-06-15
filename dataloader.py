@@ -48,8 +48,8 @@ class ChestXRayDataset(Dataset):
 
 
 class ChestXRayDataLoader:
-    def __init__(self, dataset, train_percent=0.8, val_percent=0.1, batch_size=32, num_workers=4, seed=42):
-        self.dataset = dataset
+    def __init__(self, train_percent=0.8, val_percent=0.1, batch_size=32, num_workers=4, seed=42):
+        self.dataset = ChestXRayDataset(csv_file='Data_Entry_2017.csv', image_dir='home/optimus/Downloads/Dataset/ChestXRays/NIH/images/', num_classes=15)
         self.train_percent = train_percent
         self.val_percent = val_percent
         self.batch_size = batch_size
@@ -77,8 +77,3 @@ class ChestXRayDataLoader:
         test_loader = DataLoader(test_set, batch_size=self.batch_size, shuffle=False, num_workers=self.num_workers)
         
         return train_loader, val_loader, test_loader
-
-    def __get_data():
-        dataset = ChestXRayDataset(csv_file='Data_Entry_2017.csv', image_dir='home/optimus/Downloads/Dataset/ChestXRays/NIH/images/', num_classes=15)
-        train_dataloader, val_dataloader, test_dataloader = ChestXRayDataLoader(dataset, train_percent=0.8, val_percent=0.1, batch_size=64, num_workers=4, seed=42)
-        return train_dataloader, val_dataloader, test_dataloader
