@@ -24,7 +24,7 @@ large_file_dir = '/mnt/media/wiseyak/Chest_XRays/'
 class Model():
  
     def __init__(self, trained=False):
-        self.model = ResNet50().to(DEVICE)
+        self.model = EfficientNet().to(DEVICE)
         self.classes =  {   
                             0: 'Emphysema',
                             1: 'Pneumothorax',
