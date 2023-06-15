@@ -20,7 +20,7 @@ model.load_state_dict(torch.load('saved_model/EfficientNet_11.pth', map_location
 
 
 # Load the test.csv file and select a random row
-csv_file = 'test.csv'
+csv_file = '/home/optimus/Downloads/Dataset/ChestXRays/NIH/test.csv'
 with open(csv_file, 'r') as file:
     reader = csv.reader(file)
     next(reader)  # Skip the header row
