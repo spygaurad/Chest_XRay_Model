@@ -62,10 +62,10 @@ class ChestXRayDataset(Dataset):
 
 
 class ChestXRayDataLoader:
-    def __init__(self, num_classes=15, train_percent=0.8, val_percent=0.1, batch_size=32, num_workers=4, seed=42):
-        self.train_dataset = ChestXRayDataset(csv_file=f'{root_dir}/train.csv', image_dir=f'{root_dir}/images/', num_classes=num_classes)
-        self.test_dataset = ChestXRayDataset(csv_file=f'{root_dir}/test.csv', image_dir=f'{root_dir}/images/', num_classes=num_classes)
-        self.val_dataset = ChestXRayDataset(csv_file=f'{root_dir}/val.csv', image_dir=f'{root_dir}/images/', num_classes=num_classes)
+    def __init__(self, num_classes, train_percent=0.8, val_percent=0.1, batch_size=32, num_workers=4, seed=42):
+        self.train_dataset = ChestXRayDataset(csv_file=f'{root_dir}train.csv', image_dir=f'{root_dir}images/', num_classes=num_classes)
+        self.test_dataset = ChestXRayDataset(csv_file=f'{root_dir}test.csv', image_dir=f'{root_dir}images/', num_classes=num_classes)
+        self.val_dataset = ChestXRayDataset(csv_file=f'{root_dir}val.csv', image_dir=f'{root_dir}images/', num_classes=num_classes)
         self.train_percent = train_percent
         self.val_percent = val_percent
         self.batch_size = batch_size
