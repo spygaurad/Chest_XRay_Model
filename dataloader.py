@@ -1,14 +1,16 @@
 import os
-import pandas as pd
 import numpy as np
 import torch
-from torch.utils.data import Dataset, DataLoader, random_split
+from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
 from PIL import Image
+import csv
+
+root_dir = 'Downloads/Dataset/ChestXRays/NIH/'
 
 class ChestXRayDataset(Dataset):
     def __init__(self, csv_file, image_dir, num_classes):
-        self.data = pd.read_csv(csv_file)
+        self.data = self._read_csv(csv_file)
         self.image_dir = image_dir
         self.num_classes = num_classes
         self.class_mapping = self._create_class_mapping()
@@ -17,14 +19,13 @@ class ChestXRayDataset(Dataset):
             transforms.ToTensor()
         ])
         
-
     def __len__(self):
-        return len(self.data[:])
-
+        return len(self.data)
+    
     def __getitem__(self, index):
-        row = self.data.iloc[index]
-        image_path = os.path.join(self.image_dir, row['Image Index'])
-        labels = row['Finding Labels'].split('|')
+        row = self.data[index]
+        image_path = os.path.join(self.image_dir, row[0])
+        labels = row[1].split('|')
         label_vector = self._create_label_vector(labels)
 
         try:
@@ -34,15 +35,14 @@ class ChestXRayDataset(Dataset):
             image = torch.rand(3, 256, 256)
 
         return image, label_vector
-
-
+    
     def _create_class_mapping(self):
         unique_labels = set()
-        for labels in self.data['Finding Labels'].str.split('|'):
-            unique_labels.update(labels)
+        for _, labels in self.data:
+            unique_labels.update(labels.split('|'))
         class_mapping = {label: i for i, label in enumerate(sorted(unique_labels))}
         return class_mapping
-
+    
     def _create_label_vector(self, labels):
         label_vector = np.zeros(self.num_classes, dtype=np.float32)
         for label in labels:
@@ -50,11 +50,22 @@ class ChestXRayDataset(Dataset):
                 label_index = self.class_mapping[label]
                 label_vector[label_index] = 1.0
         return torch.from_numpy(label_vector)
+    
+    def _read_csv(self, csv_file):
+        data = []
+        with open(csv_file, 'r') as file:
+            reader = csv.reader(file)
+            next(reader)  # Skip the header row
+            for row in reader:
+                data.append(row)
+        return data
 
 
 class ChestXRayDataLoader:
-    def __init__(self, train_percent=0.8, val_percent=0.1, batch_size=32, num_workers=4, seed=42):
-        self.dataset = ChestXRayDataset(csv_file='/home/optimus/Downloads/Dataset/ChestXRays/NIH/Updated_Data_Entry_2017.csv', image_dir='/home/optimus/Downloads/Dataset/ChestXRays/NIH/images/', num_classes=15)
+    def __init__(self, num_classes=15, train_percent=0.8, val_percent=0.1, batch_size=32, num_workers=4, seed=42):
+        self.train_dataset = ChestXRayDataset(csv_file=f'{root_dir}/train.csv', image_dir=f'{root_dir}/images/', num_classes=num_classes)
+        self.test_dataset = ChestXRayDataset(csv_file=f'{root_dir}/test.csv', image_dir=f'{root_dir}/images/', num_classes=num_classes)
+        self.val_dataset = ChestXRayDataset(csv_file=f'{root_dir}/val.csv', image_dir=f'{root_dir}/images/', num_classes=num_classes)
         self.train_percent = train_percent
         self.val_percent = val_percent
         self.batch_size = batch_size
@@ -63,23 +74,9 @@ class ChestXRayDataLoader:
         self.train_loader, self.val_loader, self.test_loader = self._create_data_loaders()
 
     def _create_data_loaders(self):
-        # Calculate the number of samples for each split
-        num_samples = len(self.dataset)
-        num_train = int(self.train_percent * num_samples)
-        num_val = int(self.val_percent * num_samples)
-        num_test = num_samples - num_train - num_val
-
-        # Set the random seed for reproducibility
-        torch.manual_seed(self.seed)
-
-        # Split the dataset into train, val, and test sets
-        train_set, val_set, test_set = random_split(self.dataset, [num_train, num_val, num_test])
-
         # Create the data loaders
-        train_loader = DataLoader(train_set, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers, )
-        val_loader = DataLoader(val_set, batch_size=self.batch_size, shuffle=False, num_workers=self.num_workers)
-        test_loader = DataLoader(test_set, batch_size=self.batch_size, shuffle=False, num_workers=self.num_workers)
+        train_loader = DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers)
+        val_loader = DataLoader(self.val_dataset, batch_size=self.batch_size, shuffle=False, num_workers=self.num_workers)
+        test_loader = DataLoader(self.test_dataset, batch_size=self.batch_size, shuffle=False, num_workers=self.num_workers)
 
         return train_loader, val_loader, test_loader
-
-

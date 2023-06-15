@@ -13,8 +13,8 @@ from network import EfficientNet
 from dataloader import ChestXRayDataLoader
 from metrics import DiceLoss, MixedLoss
 
-from omnixai.data.image import Image as IM
-from omnixai.explainers.vision.specific.gradcam.pytorch.gradcam import GradCAM
+# from omnixai.data.image import Image as IM
+# from omnixai.explainers.vision.specific.gradcam.pytorch.gradcam import GradCAM
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # DEVICE = "cpu"
