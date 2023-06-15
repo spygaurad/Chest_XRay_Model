@@ -6,6 +6,55 @@ from omnixai.data.image import Image
 from omnixai.explainers.vision.specific.gradcam.pytorch.gradcam import GradCAM
 
 from network import EfficientNet
-#write code to visualize the grad-cam process here
 
-img = Image(PilImage.open('../'))
+
+# If available, move the input tensors to the GPU
+DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+
+
+# Load the pre-trained model
+model = EfficientNet().to(DEVICE)
+model.load_state_dict(torch.load('saved_model/EfficientNet_11.pth', map_location=torch.device(DEVICE)))
+
+
+# Load the test.csv file and select a random row
+csv_file = 'test.csv'
+with open(csv_file, 'r') as file:
+    reader = csv.reader(file)
+    next(reader)  # Skip the header row
+    rows = list(reader)
+    random_row = random.choice(rows)
+
+# Get the image path from the first column of the random row
+image_path = random_row[0]
+
+# Load the image
+image = PilImage.open('images/image_path').convert('RGB')
+
+# Preprocess the image
+preprocess = transforms.Compose([
+    transforms.Resize((256, 256)),
+    transforms.ToTensor()
+])
+
+input_tensor = preprocess(image)
+input_batch = input_tensor.unsqueeze(0)
+
+input_batch = input_batch.to(device)
+
+# Load the Grad-CAM explainer
+explainer = GradCAM(model=model)
+
+# Perform Grad-CAM
+gradcam_map = explainer.explain(input_batch)
+
+# Convert the Grad-CAM map to a heatmap image
+heatmap = explainer.heatmap(gradcam_map)
+
+# Overlay the heatmap on the original image
+overlay = explainer.overlay_heatmap(image, heatmap)
+
+# Save the visualization images
+heatmap.save('heatmap.jpg')
+overlay.save('overlay.jpg')
