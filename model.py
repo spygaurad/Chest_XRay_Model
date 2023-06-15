@@ -129,7 +129,7 @@ class Model():
                     image = Image.fromarray(image)
                     draw = ImageDraw.Draw(image)
                     real_label = self.classes[label[sample].argmax().item()]
-                    pred_label = self.classes[pred[sample].argmax().item()]
+                    pred_label = self.classes[output[sample].argmax().item()]
                     draw.text((image.width - 200, 0), f"Real: {real_label}", fill='red')
                     draw.text((image.width - 200, 20), f"Predicted: {pred_label}", fill='blue')
                     image.save(f"saved_samples/{MODEL_NAME}/{num}.jpg")
