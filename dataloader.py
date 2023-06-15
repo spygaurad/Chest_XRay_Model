@@ -6,7 +6,7 @@ from torchvision import transforms
 from PIL import Image
 import csv
 
-root_dir = 'Downloads/Dataset/ChestXRays/NIH/'
+root_dir = '/home/optimus/Downloads/Dataset/ChestXRays/NIH/'
 
 class ChestXRayDataset(Dataset):
     def __init__(self, csv_file, image_dir, num_classes):
