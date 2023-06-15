@@ -21,14 +21,20 @@ class ChestXRayDataset(Dataset):
     def __len__(self):
         return len(self.data[:])
 
-    def __getitem__(self, index):
-        row = self.data.iloc[index]
-        image_path = os.path.join(self.image_dir, row['Image Index'])
-        labels = row['Finding Labels'].split('|')
-        label_vector = self._create_label_vector(labels)
+def __getitem__(self, index):
+    row = self.data.iloc[index]
+    image_path = os.path.join(self.image_dir, row['Image Index'])
+    labels = row['Finding Labels'].split('|')
+    label_vector = self._create_label_vector(labels)
+
+    try:
         image = Image.open(image_path).convert('RGB')
-        image = self.train_transform(image)
-        return image, label_vector
+        image = self.transform(image)
+    except (OSError, IOError):
+        return None, None
+
+    return image, label_vector
+
 
     def _create_class_mapping(self):
         unique_labels = set()
