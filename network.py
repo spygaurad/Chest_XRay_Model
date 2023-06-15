@@ -1,11 +1,12 @@
 from torchvision import models, transforms
 import torch.nn as nn
+import timm
 import torch
 
-class ResNet50(nn.Module):
+class EfficientNet(nn.Module):
     def __init__(self):
         super().__init__()
-        self.resnet = models.resnet50(pretrained=True)
+        self.model = timm.create_model('tf_efficientnetv2_b0', num_classes=1000, pretrained=True)
         self.fc1 = nn.Linear(1000, 512)
         self.fc2 = nn.Linear(512, 64)
         self.classficationLayer = nn.Linear(64, 15)

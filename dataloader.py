@@ -18,7 +18,7 @@ class ChestXRayDataset(Dataset):
         ])
 
     def __len__(self):
-        return len(self.data[:320])
+        return len(self.data[:])
 
     def __getitem__(self, index):
         row = self.data.iloc[index]
