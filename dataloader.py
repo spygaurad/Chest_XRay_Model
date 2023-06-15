@@ -38,8 +38,9 @@ class ChestXRayDataset(Dataset):
     
     def _create_class_mapping(self):
         unique_labels = set()
-        for _, labels in self.data:
-            unique_labels.update(labels.split('|'))
+        for row in self.data:
+            labels = row[1].split('|')
+            unique_labels.update(labels)
         class_mapping = {label: i for i, label in enumerate(sorted(unique_labels))}
         return class_mapping
     
