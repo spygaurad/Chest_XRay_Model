@@ -31,7 +31,7 @@ class ChestXRayDataset(Dataset):
             image = Image.open(image_path).convert('RGB')
             image = self.transform(image)
         except (OSError, IOError):
-            return None, None
+            image = torch.random(3, 256, 256)
 
         return image, label_vector
 
