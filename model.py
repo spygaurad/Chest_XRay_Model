@@ -127,9 +127,9 @@ class Model():
                         pass
                     # sample = random.randint(0, BATCH_SIZE//2)
                     image = img[0, :, :, :].cpu().numpy().transpose((1, 2, 0))
+                    im = IM(image.transpose(1, 2, 0))
                     image = (image * 255).astype('uint8')
                     image = Image.fromarray(image)
-                    im = IM(image).transpose(1, 2, 0)
                     explainer = GradCAM(model=self.model, target_layer=self.model.classficationLayer, preprocess_function=None)
                     explanations = explainer.explain(im)
                     draw = ImageDraw.Draw(im)
