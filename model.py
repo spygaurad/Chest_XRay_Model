@@ -25,6 +25,24 @@ class Model():
  
     def __init__(self, trained=False):
         self.model = ResNet50().to(DEVICE)
+        self.classes =  {   
+                            0: 'Emphysema',
+                            1: 'Pneumothorax',
+                            2: 'Consolidation',
+                            3: 'Pneumonia',
+                            4: 'Edema',
+                            5: 'Hernia',
+                            6: 'Fibrosis',
+                            7: 'Cardiomegaly',
+                            8: 'Mass',
+                            9: 'No Finding',
+                            10: 'Pleural_Thickening',
+                            11: 'Nodule',
+                            12: 'Effusion',
+                            13: 'Atelectasis',
+                            14: 'Infiltration'
+                        }            
+
 
     # def psnr(self, reconstructed, original, max_val=1.0): return 20 * torch.log10(max_val / torch.sqrt(F.mse_loss(reconstructed, original)))        
 
@@ -100,21 +118,21 @@ class Model():
                 correct = outputs.argmax(1) == label.argmax(1)
                 running_correct += correct.sum().item()
                 
-                # if i == num:
-                #     try:
-                #         os.makedirs(f"saved_samples/{MODEL_NAME}", exist_ok=True)
-                #     except:
-                #         pass
-                #     sample = random.randint(0, BATCH_SIZE//2)
-                #     image = img[sample, :, :, :].cpu().numpy().transpose((1, 2, 0))
-                #     image = (image * 255).astype('uint8')
-                #     image = Image.fromarray(image)
-                #     draw = ImageDraw.Draw(image)
-                #     real_label = self.classes[label[sample].item()]
-                #     pred_label = self.classes[pred[sample].item()]
-                #     draw.text((image.width - 200, 0), f"Real: {real_label}", fill='red')
-                #     draw.text((image.width - 200, 20), f"Predicted: {pred_label}", fill='blue')
-                #     image.save(f"saved_samples/{MODEL_NAME}/{num}.jpg")
+                if i == num:
+                    try:
+                        os.makedirs(f"saved_samples/{MODEL_NAME}", exist_ok=True)
+                    except:
+                        pass
+                    sample = random.randint(0, BATCH_SIZE//2)
+                    image = img[sample, :, :, :].cpu().numpy().transpose((1, 2, 0))
+                    image = (image * 255).astype('uint8')
+                    image = Image.fromarray(image)
+                    draw = ImageDraw.Draw(image)
+                    real_label = self.classes[label[sample].item()]
+                    pred_label = self.classes[pred[sample].item()]
+                    draw.text((image.width - 200, 0), f"Real: {real_label}", fill='red')
+                    draw.text((image.width - 200, 20), f"Predicted: {pred_label}", fill='blue')
+                    image.save(f"saved_samples/{MODEL_NAME}/{num}.jpg")
 
         # loss and accuracy for a complete epoch
         epoch_acc = 100. * (running_correct / (counter))
