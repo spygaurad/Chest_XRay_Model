@@ -5,6 +5,7 @@ from PIL import Image as PilImage
 from omnixai.data.image import Image
 from omnixai.explainers.vision.specific.gradcam.pytorch.gradcam import GradCAM
 import csv
+import random 
 
 from network import EfficientNet
 
