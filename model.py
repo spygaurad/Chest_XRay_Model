@@ -130,7 +130,7 @@ class Model():
                     image = (image * 255).astype('uint8')
                     image = Image.fromarray(image)
                     im = IM(image)
-                    explainer = GradCAM(model=model, target_layer=model.classificationLayer[-1])
+                    explainer = GradCAM(model=self.model, target_layer=self.model.classficationLayer[-1])
                     explanations = explainer.explain(im)
                     draw = ImageDraw.Draw(im)
                     real_label = self.classes[label[0].argmax().item()]
