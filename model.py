@@ -160,7 +160,7 @@ class Model():
         optimizer = optim.AdamW(self.model.parameters(), lr)
         print(f"Beginning to train...")
 
-        crossEntropyLoss = nn.CrossEntropyLoss()
+        crossEntropyLoss = nn.BCEWithLogitsLoss()
         train_loss_epochs, val_acc_epochs, test_acc_epochs = [], [], []
         writer = SummaryWriter(f'runs/{MODEL_NAME}/')
         os.makedirs("checkpoints/", exist_ok=True)
