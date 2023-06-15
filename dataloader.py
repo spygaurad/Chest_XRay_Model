@@ -12,7 +12,7 @@ class ChestXRayDataset(Dataset):
         self.image_dir = image_dir
         self.num_classes = num_classes
         self.class_mapping = self._create_class_mapping()
-        self.train_transform = transforms.Compose([
+        self.transform = transforms.Compose([
             transforms.Resize((256, 256)),
             transforms.ToTensor()
         ])
@@ -26,13 +26,13 @@ class ChestXRayDataset(Dataset):
         image_path = os.path.join(self.image_dir, row['Image Index'])
         labels = row['Finding Labels'].split('|')
         label_vector = self._create_label_vector(labels)
-    
+
         try:
             image = Image.open(image_path).convert('RGB')
             image = self.transform(image)
         except (OSError, IOError):
             return None, None
-    
+
         return image, label_vector
 
 
