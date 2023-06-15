@@ -14,6 +14,7 @@ class ChestXRayDataset(Dataset):
         self.class_mapping = self._create_class_mapping()
         self.transform = transforms.Compose([
             transforms.Resize((256, 256)),
+            transforms.RandAugment(num_ops=2, magnitude=9),
             transforms.ToTensor()
         ])
 
