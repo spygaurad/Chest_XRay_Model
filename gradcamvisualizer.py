@@ -43,7 +43,7 @@ preprocess = transforms.Compose([
 input_tensor = preprocess(image)
 input_batch = input_tensor.unsqueeze(0)
 
-input_batch = input_batch.to(device)
+input_batch = input_batch.to(DEVICE)
 
 # Load the Grad-CAM explainer
 explainer = GradCAM(model=model)
