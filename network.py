@@ -6,7 +6,7 @@ import torch
 class EfficientNet(nn.Module):
     def __init__(self):
         super().__init__()
-        self.model = timm.create_model('tf_efficientnetv2_b0', num_classes=1000, pretrained=True)
+        self.effnet = timm.create_model('tf_efficientnetv2_b0', num_classes=1000, pretrained=True)
         self.fc1 = nn.Linear(1000, 512)
         self.fc2 = nn.Linear(512, 64)
         self.classficationLayer = nn.Linear(64, 15)
@@ -15,7 +15,7 @@ class EfficientNet(nn.Module):
         self.sigmoid = nn.Sigmoid()
     
     def forward(self, x):
-        x = self.resnet(x)
+        x = self.effnet(x)
         x = self.relu(self.fc2(self.relu(self.fc1(x))))
         return  self.sigmoid(self.classficationLayer(x))
 
