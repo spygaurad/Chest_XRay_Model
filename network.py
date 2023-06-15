@@ -7,7 +7,7 @@ class EfficientNet(nn.Module):
     def __init__(self):
         super().__init__()
         self.effnet = timm.create_model('tf_efficientnetv2_b0', num_classes=1024, pretrained=False)
-        self.fc1 = nn.Linear(1000, 512)
+        self.fc1 = nn.Linear(1024, 512)
         self.fc2 = nn.Linear(512, 64)
         self.classficationLayer = nn.Linear(64, 15)
         # self.classIndexLayer = nn.Linear(64, 10)
