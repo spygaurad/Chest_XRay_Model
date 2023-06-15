@@ -15,8 +15,6 @@ class EfficientNet(nn.Module):
         self.sigmoid = nn.Sigmoid()
     
     def forward(self, x):
-        if x.shape[1] == 256:
-            x = x.permute(0, 3, 2, 1)
         x = self.effnet(x)
         x = self.relu(self.fc2(self.relu(self.fc1(x))))
         return  self.classficationLayer(x)
