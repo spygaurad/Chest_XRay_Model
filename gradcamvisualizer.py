@@ -32,7 +32,7 @@ with open(csv_file, 'r') as file:
 image_path = random_row[0]
 
 # Load the image
-image = PilImage.open('images/image_path').convert('RGB')
+image = PilImage.open(f'images/{image_path}').convert('RGB')
 
 # Preprocess the image
 preprocess = transforms.Compose([
