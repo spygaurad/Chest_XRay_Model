@@ -7,16 +7,16 @@ from torchvision import transforms
 from PIL import Image
 
 class ChestXRayDataset(Dataset):
-    def __init__(self, csv_file, image_dir, num_classes):
+    def __init__(self, csv_file, image_dir, num_classes, transform):
         self.data = pd.read_csv(csv_file)
         self.image_dir = image_dir
         self.num_classes = num_classes
         self.class_mapping = self._create_class_mapping()
-        self.transform = transforms.Compose([
+        self.train_transform = transforms.Compose([
             transforms.Resize((256, 256)),
-            transforms.RandAugment(num_ops=2, magnitude=9),
             transforms.ToTensor()
         ])
+        
 
     def __len__(self):
         return len(self.data[:])
@@ -27,7 +27,7 @@ class ChestXRayDataset(Dataset):
         labels = row['Finding Labels'].split('|')
         label_vector = self._create_label_vector(labels)
         image = Image.open(image_path).convert('RGB')
-        image = self.transform(image)
+        image = self.train_transform(image)
         return image, label_vector
 
     def _create_class_mapping(self):
@@ -54,7 +54,6 @@ class ChestXRayDataLoader:
         self.batch_size = batch_size
         self.num_workers = num_workers
         self.seed = seed
-
         self.train_loader, self.val_loader, self.test_loader = self._create_data_loaders()
 
     def _create_data_loaders(self):
@@ -71,7 +70,7 @@ class ChestXRayDataLoader:
         train_set, val_set, test_set = random_split(self.dataset, [num_train, num_val, num_test])
 
         # Create the data loaders
-        train_loader = DataLoader(train_set, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers)
+        train_loader = DataLoader(train_set, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers, )
         val_loader = DataLoader(val_set, batch_size=self.batch_size, shuffle=False, num_workers=self.num_workers)
         test_loader = DataLoader(test_set, batch_size=self.batch_size, shuffle=False, num_workers=self.num_workers)
 
