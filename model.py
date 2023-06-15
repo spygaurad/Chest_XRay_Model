@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.optim as optim
 import random
 import os
-from PIL import Image
+from PIL import Image, ImageDraw
 from tqdm import tqdm
 import torch.nn.functional as F
 import torchvision.transforms.functional as trF
