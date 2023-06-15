@@ -49,7 +49,7 @@ class Model():
             optimizer.step()
 
             # print(label, pred)
-            correct = pred.argmax(1) == label.argmax(1)
+            correct = outputs.argmax(1) == label.argmax(1)
             running_correct += correct.sum().item()
 
         # loss and accuracy for a complete epoch
@@ -97,7 +97,7 @@ class Model():
                 img, label = img.to(DEVICE), label.to(DEVICE)
                 outputs = self.model(img)
                 #calculate accuracy
-                correct = pred.argmax(1) == label.argmax(1)
+                correct = outputs.argmax(1) == label.argmax(1)
                 running_correct += correct.sum().item()
                 
                 # if i == num:
