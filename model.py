@@ -17,7 +17,7 @@ from metrics import DiceLoss, MixedLoss
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # DEVICE = "cpu"
 BATCH_SIZE = 64
-MODEL_NAME = "ResNet50"
+MODEL_NAME = "EfficientNet"
 large_file_dir = '/mnt/media/wiseyak/Chest_XRays/'
 
 
@@ -135,7 +135,7 @@ class Model():
                     image.save(f"saved_samples/{MODEL_NAME}/{num}.jpg")
 
         # loss and accuracy for a complete epoch
-        epoch_acc = 100. * (running_correct / (counter))
+        epoch_acc = 100. * (running_correct / (counter*BATCH_SIZE))
     
         return epoch_acc
 
