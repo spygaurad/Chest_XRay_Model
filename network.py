@@ -17,7 +17,7 @@ class EfficientNet(nn.Module):
     def forward(self, x):
         x = self.effnet(x)
         x = self.relu(self.fc2(self.relu(self.fc1(x))))
-        return  self.sigmoid(self.classficationLayer(x))
+        return  self.classficationLayer(x)
 
 # inp = torch.rand((1, 3, 256, 256))
 # model = ResNet50()
