@@ -125,16 +125,16 @@ class Model():
                         os.makedirs(f"saved_samples/{MODEL_NAME}", exist_ok=True)
                     except:
                         pass
-                    sample = random.randint(0, BATCH_SIZE//2)
-                    image = img[sample, :, :, :].cpu().numpy().transpose((1, 2, 0))
+                    # sample = random.randint(0, BATCH_SIZE//2)
+                    image = img[0, :, :, :].cpu().numpy().transpose((1, 2, 0))
                     image = (image * 255).astype('uint8')
                     image = Image.fromarray(image)
                     im = IM(image)
                     explainer = GradCAM(model=model, target_layer=model.classificationLayer[-1])
                     explanations = explainer.explain(im)
                     draw = ImageDraw.Draw(im)
-                    real_label = self.classes[label[sample].argmax().item()]
-                    pred_label = self.classes[outputs[sample].argmax().item()]
+                    real_label = self.classes[label[0].argmax().item()]
+                    pred_label = self.classes[outputs[0].argmax().item()]
                     draw.text((image.width - 200, 0), f"Real: {real_label}", fill='red')
                     draw.text((image.width - 200, 20), f"Predicted: {pred_label}", fill='blue')
                     image.save(f"saved_samples/{MODEL_NAME}/{num}.jpg")
