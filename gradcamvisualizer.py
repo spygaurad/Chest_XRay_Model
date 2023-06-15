@@ -46,7 +46,7 @@ input_batch = input_tensor.unsqueeze(0)
 input_batch = input_batch.to(DEVICE)
 
 # Load the Grad-CAM explainer
-explainer = GradCAM(model=model)
+explainer = GradCAM(model=model, target_layer=model.classficationLayer, preprocess_function=preprocess)
 
 # Perform Grad-CAM
 gradcam_map = explainer.explain(input_batch)
