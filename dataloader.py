@@ -73,6 +73,14 @@ class ChestXRayDataLoader:
         self.num_workers = num_workers
         self.seed = seed
         self.train_loader, self.val_loader, self.test_loader = self._create_data_loaders()
+        self.classweights = self._calculate_class_weights()
+
+    def _calculate_class_weights(self):
+        class_counts = Counter(self.train_dataset.labels)
+        class_weights = [1.0 / float(count) for count in class_counts.values()]
+        return class_weights
+
+
 
     def _create_data_loaders(self):
         # Create the data loaders
