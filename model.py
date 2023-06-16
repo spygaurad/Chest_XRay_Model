@@ -183,10 +183,11 @@ class Model():
                 print("Saving model")
                 torch.save(self.model.state_dict(), f"saved_model/{MODEL_NAME}_{epoch}.pth")
                 print("Model Saved")
+                writer.add_scalar("Accuracy/Test", test_acc, epoch)
 
             print(f"Train Loss:{train_loss}, Train Accuracy:{train_acc}, Validation Accuracy:{val_acc}")
 
-            if max(test_acc_epochs) == test_acc:
+            if max(val_acc_epochs) == val_acc:
                 torch.save({
                 'epoch': epoch,
                 'model_state_dict': self.model.state_dict(),
@@ -197,7 +198,6 @@ class Model():
             writer.add_scalar("Loss/train", train_loss, epoch)
             writer.add_scalar("Accuracy/train", train_acc, epoch)
             writer.add_scalar("Accuracy/val", val_acc, epoch)
-            writer.add_scalar("Accuracy/Test", test_acc, epoch)
             
     
             print("Epoch Completed. Proceeding to next epoch...")
