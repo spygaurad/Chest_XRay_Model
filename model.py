@@ -103,7 +103,7 @@ class Model():
 
 
 
-    def test(self, dataset):
+    def test(self, dataset, epoch):
 
         # self.model.load_state_dict(torch.load('saved_model/TOMATO_LEAF_PLANTVILLAGE_EFFICIENTNET_10CLASSES_V1_3_200.pth'))
         running_correct = 0.0
@@ -134,7 +134,7 @@ class Model():
                 pred_label = self.classes[outputs[0].argmax().item()]
                 draw.text((image.width - 200, 0), f"Real: {real_label}", fill='red')
                 draw.text((image.width - 200, 20), f"Predicted: {pred_label}", fill='blue')
-                image.save(f"saved_samples/{MODEL_NAME}/{num}.jpg")
+                image.save(f"saved_samples/{MODEL_NAME}/{epoch}.jpg")
 
         # loss and accuracy for a complete epoch
         epoch_acc = 100. * (running_correct / (counter*BATCH_SIZE))
@@ -173,12 +173,18 @@ class Model():
             print(f"Epoch No: {epoch}")
             train_loss, train_acc = self.train(dataset=train_data, loss_func=binaryCrossEntropyLoss, optimizer=optimizer)
             val_acc = self.validate(dataset=val_data)
-            test_acc = self.test(dataset=test_data)
             train_loss_epochs.append(train_loss)
             val_acc_epochs.append(val_acc)
-            test_acc_epochs.append(test_acc)
-            print(f"Train Loss:{train_loss}, Train Accuracy:{train_acc}, Validation Accuracy:{val_acc}, Test Accuracy: {test_acc}")
-            print(f"Test Accuracy: {test_acc}")
+
+            if epoch%5==0:
+                test_acc = self.test(dataset=test_data, epoch=epoch)
+                test_acc_epochs.append(test_acc)
+                print(f"Test Accuracy: {test_acc}")
+                print("Saving model")
+                torch.save(self.model.state_dict(), f"saved_model/{MODEL_NAME}_{epoch}.pth")
+                print("Model Saved")
+
+            print(f"Train Loss:{train_loss}, Train Accuracy:{train_acc}, Validation Accuracy:{val_acc}")
 
             if max(test_acc_epochs) == test_acc:
                 torch.save({
@@ -193,9 +199,6 @@ class Model():
             writer.add_scalar("Accuracy/val", val_acc, epoch)
             writer.add_scalar("Accuracy/Test", test_acc, epoch)
             
-            print("Saving model")
-            torch.save(self.model.state_dict(), f"saved_model/{MODEL_NAME}_{epoch}.pth")
-            print("Model Saved")
     
             print("Epoch Completed. Proceeding to next epoch...")
 
