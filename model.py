@@ -18,7 +18,7 @@ from metrics import DiceLoss, MixedLoss
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # DEVICE = "cpu"
-BATCH_SIZE = 8
+BATCH_SIZE = 64
 MODEL_NAME = "EfficientNet"
 large_file_dir = '/mnt/media/wiseyak/Chest_XRays/'
 
