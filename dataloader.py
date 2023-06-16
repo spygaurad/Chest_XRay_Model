@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import torch
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset, DataLoader, WeightedRandomSampler
 from torchvision import transforms
 from PIL import Image
 import csv
@@ -62,6 +62,9 @@ class ChestXRayDataset(Dataset):
         return data
 
 
+
+
+
 class ChestXRayDataLoader:
     def __init__(self, num_classes=15, train_percent=0.8, val_percent=0.1, batch_size=64, num_workers=4, seed=42):
         self.train_dataset = ChestXRayDataset(csv_file=f'{root_dir}train.csv', image_dir=f'{root_dir}images/', num_classes=num_classes)
@@ -72,20 +75,21 @@ class ChestXRayDataLoader:
         self.batch_size = batch_size
         self.num_workers = num_workers
         self.seed = seed
-        self.train_loader, self.val_loader, self.test_loader = self._create_data_loaders()
-        self.classweights = self._calculate_class_weights()
 
-    def _calculate_class_weights(self):
-        class_counts = Counter(self.train_dataset.labels)
-        class_weights = [1.0 / float(count) for count in class_counts.values()]
-        return class_weights
+        # Calculate class weights
+        class_frequencies = self.train_dataset.data[:, 1].sum(axis=0)
+        total_samples = len(self.train_dataset)
+        inverse_weights = total_samples / (class_frequencies + 1e-6)
+        inverse_weights = inverse_weights / inverse_weights.sum()
+        class_weights = torch.tensor(inverse_weights, dtype=torch.float32)
+        print(class_weights)
 
-
-
-    def _create_data_loaders(self):
         # Create the data loaders
-        train_loader = DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers)
+        train_loader = DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers, sampler=WeightedRandomSampler(class_weights, len(self.train_dataset)))
         val_loader = DataLoader(self.val_dataset, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers)
         test_loader = DataLoader(self.test_dataset, batch_size=1, shuffle=False, num_workers=self.num_workers)
 
-        return train_loader, val_loader, test_loader
+        self.class_weights = class_weights
+        self.train_loader = train_loader
+        self.val_loader = val_loader
+        self.test_loader = test_loader
