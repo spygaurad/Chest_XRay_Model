@@ -148,7 +148,7 @@ class Model():
 
         print(f"Using {DEVICE} device...")
         print("Loading Datasets...")
-        train_data, val_data, test_data = ChestXRayDataLoader().train_loader, ChestXRayDataLoader().val_loader, ChestXRayDataLoader().test_loader
+        train_data, val_data, test_data = ChestXRayDataLoader(batch_size=BATCH_SIZE).train_loader, ChestXRayDataLoader(batch_size=BATCH_SIZE).val_loader, ChestXRayDataLoader(batch_size=BATCH_SIZE).test_loader
         print("Dataset Loaded.")
 
         print("Initializing Parameters...")
