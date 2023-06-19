@@ -144,7 +144,6 @@ class Model():
 
  
     def fit(self, epochs, lr):
-
         print(f"Using {DEVICE} device...")
 
         print("Initializing Parameters...")
@@ -156,25 +155,25 @@ class Model():
         optimizer = optim.Adam(self.model.parameters(), lr)
 
         print("Loading Datasets...")
-        data_loader = ChestXRayDataLoader(batch_size=BATCH_SIZE)
+        data_loader = ChestXRayDataLoader(batch_size=BATCH_SIZE, num_classes=NUM_CLASSES)
         train_loader, val_loader, test_loader = data_loader.load_data()
-        
+
         # Calculate class imbalance
-        class_counts = torch.zeros(data_loader.num_classes, device='cuda')
+        class_counts = torch.zeros(data_loader.train_dataset.num_classes, device=DEVICE)
         total_samples = 0
-        
+
         for images, labels in train_loader:
             class_counts += torch.sum(labels, dim=0)
             total_samples += labels.shape[0]
-        
+
         class_weights = total_samples / (len(train_loader) * class_counts)
-        weight_tensor = torch.tensor(class_weights, device='cuda')
-        
+        weight_tensor = torch.tensor(class_weights, device=DEVICE)
+
         print("Dataset Loaded.")
         binaryCrossEntropyLoss = nn.BCEWithLogitsLoss(weight=weight_tensor)
-        
 
         print(f"Beginning to train...")
+
         # mseloss = nn.MSELoss()
         train_loss_epochs, val_acc_epochs, test_acc_epochs = [], [], []
         writer = SummaryWriter(f'runs/{MODEL_NAME}/')
