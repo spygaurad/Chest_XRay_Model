@@ -156,7 +156,7 @@ class Model():
 
         print("Loading Datasets...")
         data_loader = ChestXRayDataLoader(batch_size=BATCH_SIZE)
-        train_loader, val_loader, test_loader = data_loader.load_data()
+        train_data, val_data, test_data = data_loader.load_data()
 
         # print("Converting the model and data loaders to CUDA device...")
         # self.model = self.model.to(DEVICE)
