@@ -156,17 +156,23 @@ class Model():
         optimizer = optim.Adam(self.model.parameters(), lr)
 
         print("Loading Datasets...")
-        train_data, val_data, test_data = ChestXRayDataLoader(batch_size=BATCH_SIZE).load_data()
+        data_loader = ChestXRayDataLoader(batch_size=BATCH_SIZE)
+        train_loader, val_loader, test_loader = data_loader.load_data()
+        
         # Calculate class imbalance
-        img, labels = train_data
-        class_counts = torch.sum(labels, dim=0)
-        total_samples = labels.shape[0]
-        class_weights = total_samples / (len(class_counts) * class_counts)
-        weight_tensor = torch.tensor(class_weights, device='cuda:0')
-
+        class_counts = torch.zeros(data_loader.num_classes, device='cuda')
+        total_samples = 0
+        
+        for images, labels in train_loader:
+            class_counts += torch.sum(labels, dim=0)
+            total_samples += labels.shape[0]
+        
+        class_weights = total_samples / (len(train_loader) * class_counts)
+        weight_tensor = torch.tensor(class_weights, device='cuda')
+        
         print("Dataset Loaded.")
         binaryCrossEntropyLoss = nn.BCEWithLogitsLoss(weight=weight_tensor)
-
+        
 
         print(f"Beginning to train...")
         # mseloss = nn.MSELoss()
