@@ -161,7 +161,8 @@ class Model():
         # Calculate class imbalance
         class_counts = torch.zeros(data_loader.train_dataset.num_classes, device=DEVICE)
         total_samples = 0
-        for (image, labels.to(DEVICE)) in train_data:
+        for (image, labels) in train_data:
+            labels = labels.to(DEVICE)
             labels = labels - 1  # Subtract 1 to convert to 0-based indices
             class_counts += torch.sum(labels, dim=0)
             total_samples += labels.shape[0]
