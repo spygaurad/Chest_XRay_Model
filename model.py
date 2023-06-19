@@ -155,7 +155,7 @@ class Model():
         optimizer = optim.Adam(self.model.parameters(), lr)
 
         print("Loading Datasets...")
-        data_loader = ChestXRayDataLoader(batch_size=BATCH_SIZE, num_classes=NUM_CLASSES)
+        data_loader = ChestXRayDataLoader(batch_size=BATCH_SIZE)
         train_loader, val_loader, test_loader = data_loader.load_data()
 
         # Calculate class imbalance
