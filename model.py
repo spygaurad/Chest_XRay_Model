@@ -18,7 +18,7 @@ from metrics import DiceLoss, MixedLoss
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # DEVICE = "cpu"
-BATCH_SIZE = 64
+BATCH_SIZE = 2
 MODEL_NAME = "EfficientNet"
 large_file_dir = '/mnt/media/wiseyak/Chest_XRays/'
 
@@ -159,7 +159,7 @@ class Model():
         optimizer = optim.AdamW(self.model.parameters(), lr)
         print(f"Beginning to train...")
 
-        binaryCrossEntropyLoss = nn.BCEWithLogitsLoss(weight=classweights)
+        binaryCrossEntropyLoss = nn.BCELoss()
         # mseloss = nn.MSELoss()
         train_loss_epochs, val_acc_epochs, test_acc_epochs = [], [], []
         writer = SummaryWriter(f'runs/{MODEL_NAME}/')
