@@ -63,33 +63,17 @@ class ChestXRayDataset(Dataset):
 
 
 
-
-
 class ChestXRayDataLoader:
-    def __init__(self, num_classes=15, train_percent=0.8, val_percent=0.1, batch_size=64, num_workers=4, seed=42):
-        self.train_dataset = ChestXRayDataset(csv_file=f'{root_dir}train.csv', image_dir=f'{root_dir}images/', num_classes=num_classes)
-        self.test_dataset = ChestXRayDataset(csv_file=f'{root_dir}test.csv', image_dir=f'{root_dir}images/', num_classes=num_classes)
-        self.val_dataset = ChestXRayDataset(csv_file=f'{root_dir}val.csv', image_dir=f'{root_dir}images/', num_classes=num_classes)
-        self.train_percent = train_percent
-        self.val_percent = val_percent
+    def __init__(self,image_dir, num_classes, batch_size, num_workers):
+        image_dir = f'{root_dir}/images/'
+        self.train_dataset = ChestXRayDataset(f'{root_dir}/Datasets/', image_dir, num_classes)
+        self.val_dataset = ChestXRayDataset(val_csv_file, image_dir, num_classes)
+        self.test_dataset = ChestXRayDataset(test_csv_file, image_dir, num_classes)
         self.batch_size = batch_size
         self.num_workers = num_workers
-        self.seed = seed
 
-        # Calculate class weights
-        class_frequencies = self.train_dataset.data[:, 1].sum(axis=0)
-        total_samples = len(self.train_dataset)
-        inverse_weights = total_samples / (class_frequencies + 1e-6)
-        inverse_weights = inverse_weights / inverse_weights.sum()
-        class_weights = torch.tensor(inverse_weights, dtype=torch.float32)
-        print(class_weights)
-
-        # Create the data loaders
-        train_loader = DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers, sampler=WeightedRandomSampler(class_weights, len(self.train_dataset)))
-        val_loader = DataLoader(self.val_dataset, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers)
-        test_loader = DataLoader(self.test_dataset, batch_size=1, shuffle=False, num_workers=self.num_workers)
-
-        self.class_weights = class_weights
-        self.train_loader = train_loader
-        self.val_loader = val_loader
-        self.test_loader = test_loader
+    def load_data(self):
+        train_loader = DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers)
+        val_loader = DataLoader(self.val_dataset, batch_size=self.batch_size, shuffle=False, num_workers=self.num_workers)
+        test_loader = DataLoader(self.test_dataset, batch_size=1, shuffle=False, num_workers=self.num_workers)  
+        return train_loader, val_loader, test_loader

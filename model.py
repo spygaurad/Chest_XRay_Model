@@ -50,7 +50,6 @@ class Model():
 
 
     def train(self, dataset, loss_func, optimizer):
-        dataset = dataset
         self.model.train()
         running_loss = 0.0
         running_correct = 0.0
@@ -148,7 +147,7 @@ class Model():
 
         print(f"Using {DEVICE} device...")
         print("Loading Datasets...")
-        train_data, classweights, val_data, test_data = ChestXRayDataLoader(batch_size=BATCH_SIZE).train_loader, ChestXRayDataLoader(batch_size=BATCH_SIZE).classweights, ChestXRayDataLoader(batch_size=BATCH_SIZE).val_loader, ChestXRayDataLoader(batch_size=BATCH_SIZE).test_loader
+        train_data, val_data, test_data = ChestXRayDataLoader(batch_size=BATCH_SIZE)
         print("Dataset Loaded.")
 
         print("Initializing Parameters...")
@@ -171,7 +170,7 @@ class Model():
         for epoch in range(1, epochs+1):
 
             print(f"Epoch No: {epoch}")
-            train_loss, train_acc = self.train(dataset=(train_data, classweights), loss_func=binaryCrossEntropyLoss, optimizer=optimizer)
+            train_loss, train_acc = self.train(dataset=train_data, loss_func=binaryCrossEntropyLoss, optimizer=optimizer)
             val_acc = self.validate(dataset=val_data)
             train_loss_epochs.append(train_loss)
             val_acc_epochs.append(val_acc)
