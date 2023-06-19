@@ -18,7 +18,7 @@ from metrics import DiceLoss, MixedLoss
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # DEVICE = "cpu"
-BATCH_SIZE = 2
+BATCH_SIZE = 32
 MODEL_NAME = "EfficientNet"
 large_file_dir = '/mnt/media/wiseyak/Chest_XRays/'
 
@@ -146,9 +146,6 @@ class Model():
     def fit(self, epochs, lr):
 
         print(f"Using {DEVICE} device...")
-        print("Loading Datasets...")
-        train_data, val_data, test_data = ChestXRayDataLoader(batch_size=BATCH_SIZE).load_data()
-        print("Dataset Loaded.")
 
         print("Initializing Parameters...")
         self.model = self.model.to(DEVICE)
@@ -156,10 +153,22 @@ class Model():
         print("Total parameters of the model is: {:.2f}{}".format(total_params / 10**(3 * min(len(str(total_params)) // 3, len(["", "K", "M", "B", "T"]) - 1)), ["", "K", "M", "B", "T"][min(len(str(total_params)) // 3, len(["", "K", "M", "B", "T"]) - 1)]))
 
         print(f"Initializing the Optimizer")
-        optimizer = optim.AdamW(self.model.parameters(), lr)
-        print(f"Beginning to train...")
+        optimizer = optim.Adam(self.model.parameters(), lr)
 
-        binaryCrossEntropyLoss = nn.BCELoss()
+        print("Loading Datasets...")
+        train_data, val_data, test_data = ChestXRayDataLoader(batch_size=BATCH_SIZE).load_data()
+        # Calculate class imbalance
+        labels = train_data[1]
+        class_counts = torch.sum(labels, dim=0)
+        total_samples = labels.shape[0]
+        class_weights = total_samples / (len(class_counts) * class_counts)
+        weight_tensor = torch.tensor(class_weights, device='cuda:0')
+
+        print("Dataset Loaded.")
+        binaryCrossEntropyLoss = nn.BCEWithLogitsLoss(weight=weight_tensor)
+
+
+        print(f"Beginning to train...")
         # mseloss = nn.MSELoss()
         train_loss_epochs, val_acc_epochs, test_acc_epochs = [], [], []
         writer = SummaryWriter(f'runs/{MODEL_NAME}/')
