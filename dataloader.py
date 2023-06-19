@@ -49,7 +49,7 @@ class ChestXRayDataset(Dataset):
         for label in labels:
             if label in self.class_mapping:
                 label_index = self.class_mapping[label]
-                label_vector[label_index] = 0.0
+                label_vector[label_index] = 1.0
         return torch.from_numpy(label_vector)
     
     def _read_csv(self, csv_file):
@@ -64,7 +64,7 @@ class ChestXRayDataset(Dataset):
 
 
 class ChestXRayDataLoader:
-    def __init__(self, batch_size, num_classes=15):
+    def __init__(self, batch_size, num_classes=16):
         image_dir = f'{root_dir}/images/'
         self.train_dataset = ChestXRayDataset(f'Datasets/multilabel_classification/train.csv', image_dir, num_classes)
         self.val_dataset = ChestXRayDataset(f'Datasets/multilabel_classification/val.csv', image_dir, num_classes)
