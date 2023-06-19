@@ -158,7 +158,7 @@ class Model():
         print("Loading Datasets...")
         train_data, val_data, test_data = ChestXRayDataLoader(batch_size=BATCH_SIZE).load_data()
         # Calculate class imbalance
-        labels = train_data[1]
+        img, labels = train_data
         class_counts = torch.sum(labels, dim=0)
         total_samples = labels.shape[0]
         class_weights = total_samples / (len(class_counts) * class_counts)
