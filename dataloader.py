@@ -70,7 +70,6 @@ class ChestXRayDataLoader:
         self.val_dataset = ChestXRayDataset(f'Datasets/multilabel_classification/val.csv', image_dir, num_classes)
         self.test_dataset = ChestXRayDataset(f'Datasets/multilabel_classification/test.csv', image_dir, num_classes)
         self.batch_size = batch_size
-        self.num_workers = num_workers
 
     def load_data(self):
         train_loader = DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True)
