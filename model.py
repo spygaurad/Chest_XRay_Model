@@ -163,7 +163,6 @@ class Model():
         total_samples = 0
         for (image, labels) in train_data:
             labels = labels.to(DEVICE)
-            labels = labels - 1  # Subtract 1 to convert to 0-based indices
             class_counts += torch.sum(labels, dim=0)
             total_samples += labels.shape[0]
 
