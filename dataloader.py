@@ -64,7 +64,7 @@ class ChestXRayDataset(Dataset):
 
 
 class ChestXRayDataLoader:
-    def __init__(self, batch_size, num_classes=15, num_workers=4):
+    def __init__(self, batch_size, num_classes=15):
         image_dir = f'{root_dir}/images/'
         self.train_dataset = ChestXRayDataset(f'Datasets/multilabel_classification/train.csv', image_dir, num_classes)
         self.val_dataset = ChestXRayDataset(f'Datasets/multilabel_classification/val.csv', image_dir, num_classes)
@@ -73,7 +73,7 @@ class ChestXRayDataLoader:
         self.num_workers = num_workers
 
     def load_data(self):
-        train_loader = DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers)
-        val_loader = DataLoader(self.val_dataset, batch_size=self.batch_size, shuffle=False, num_workers=self.num_workers)
-        test_loader = DataLoader(self.test_dataset, batch_size=1, shuffle=False, num_workers=self.num_workers)  
+        train_loader = DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True)
+        val_loader = DataLoader(self.val_dataset, batch_size=self.batch_size, shuffle=False)
+        test_loader = DataLoader(self.test_dataset, batch_size=1, shuffle=False)  
         return train_loader, val_loader, test_loader
