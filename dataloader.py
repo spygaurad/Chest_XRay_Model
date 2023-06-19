@@ -49,7 +49,7 @@ class ChestXRayDataset(Dataset):
         for label in labels:
             if label in self.class_mapping:
                 label_index = self.class_mapping[label]
-                label_vector[label_index] = 1.0
+                label_vector[label_index] = 0.0
         return torch.from_numpy(label_vector)
     
     def _read_csv(self, csv_file):
