@@ -168,10 +168,12 @@ class Model():
         class_counts = torch.zeros(data_loader.train_dataset.num_classes, device=DEVICE)
         total_samples = 0
 
-        for images, labels in train_loader:
+        for batch in train_loader:
+            images, labels = batch
             labels = labels - 1  # Subtract 1 to convert to 0-based indices
             class_counts += torch.sum(labels, dim=0)
             total_samples += labels.shape[0]
+
 
         class_weights = total_samples / (len(train_loader) * class_counts)
         weight_tensor = torch.tensor(class_weights, device=DEVICE)
