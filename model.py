@@ -158,21 +158,22 @@ class Model():
         data_loader = ChestXRayDataLoader(batch_size=BATCH_SIZE)
         train_data, val_data, test_data = data_loader.load_data()
 
-        # Calculate class imbalance
-        class_counts = torch.zeros(data_loader.train_dataset.num_classes, device=DEVICE)
-        total_samples = 0
-        for (image, labels) in train_data:
-            labels = labels.to(DEVICE)
-            class_counts += torch.sum(labels, dim=0)
-            total_samples += labels.shape[0]
+        # # Calculate class imbalance
+        # class_counts = torch.zeros(data_loader.train_dataset.num_classes, device=DEVICE)
+        # total_samples = 0
+        # for (image, labels) in train_data:
+        #     labels = labels.to(DEVICE)
+        #     class_counts += torch.sum(labels, dim=0)
+        #     total_samples += labels.shape[0]
 
 
-        class_weights = total_samples / (len(train_data) * class_counts)
-        weight_tensor = torch.tensor(class_weights, device=DEVICE)
+        # class_weights = total_samples / (len(train_data) * class_counts)
+        # weight_tensor = torch.tensor(class_weights, device=DEVICE)
 
         print("Dataset Loaded.")
-        binaryCrossEntropyLoss = nn.BCEWithLogitsLoss(weight=weight_tensor)
+        # binaryCrossEntropyLoss = nn.BCEWithLogitsLoss(weight=weight_tensor)
         # binaryCrossEntropyLoss = nn.BCEWithLogitsLoss()
+        mseloss = nn.MSELoss()
 
         print(f"Beginning to train...")
 
@@ -187,7 +188,7 @@ class Model():
         for epoch in range(1, epochs+1):
 
             print(f"Epoch No: {epoch}")
-            train_loss, train_acc = self.train(dataset=train_data, loss_func=binaryCrossEntropyLoss, optimizer=optimizer)
+            train_loss, train_acc = self.train(dataset=train_data, loss_func=mseloss, optimizer=optimizer)
             val_acc = self.validate(dataset=val_data)
             train_loss_epochs.append(train_loss)
             val_acc_epochs.append(val_acc)
