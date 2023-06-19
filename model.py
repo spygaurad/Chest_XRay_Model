@@ -145,40 +145,40 @@ class Model():
  
     def fit(self, epochs, lr):
         print(f"Using {DEVICE} device...")
-    
+
         print("Initializing Parameters...")
         self.model = self.model.to(DEVICE)
         total_params = sum(p.numel() for p in self.model.parameters())
         print("Total parameters of the model is: {:.2f}{}".format(total_params / 10**(3 * min(len(str(total_params)) // 3, len(["", "K", "M", "B", "T"]) - 1)), ["", "K", "M", "B", "T"][min(len(str(total_params)) // 3, len(["", "K", "M", "B", "T"]) - 1)]))
-    
+
         print(f"Initializing the Optimizer")
         optimizer = optim.Adam(self.model.parameters(), lr)
-    
+
         print("Loading Datasets...")
-        data_loader = ChestXRayDataLoader(batch_size=BATCH_SIZE, num_classes=NUM_CLASSES)
+        data_loader = ChestXRayDataLoader(batch_size=BATCH_SIZE)
         train_loader, val_loader, test_loader = data_loader.load_data()
-    
-        print("Converting the model and data loaders to CUDA device...")
-        self.model = self.model.to(DEVICE)
-        train_loader = self._to_device(train_loader)
-        val_loader = self._to_device(val_loader)
-        test_loader = self._to_device(test_loader)
-    
+
+        # print("Converting the model and data loaders to CUDA device...")
+        # self.model = self.model.to(DEVICE)
+        # train_loader = self._to_device(train_loader)
+        # val_loader = self._to_device(val_loader)
+        # test_loader = self._to_device(test_loader)
+
         # Calculate class imbalance
         class_counts = torch.zeros(data_loader.train_dataset.num_classes, device=DEVICE)
         total_samples = 0
-    
+
         for images, labels in train_loader:
             labels = labels - 1  # Subtract 1 to convert to 0-based indices
             class_counts += torch.sum(labels, dim=0)
             total_samples += labels.shape[0]
-    
+
         class_weights = total_samples / (len(train_loader) * class_counts)
         weight_tensor = torch.tensor(class_weights, device=DEVICE)
-    
+
         print("Dataset Loaded.")
         binaryCrossEntropyLoss = nn.BCEWithLogitsLoss(weight=weight_tensor)
-    
+
         print(f"Beginning to train...")
 
 
