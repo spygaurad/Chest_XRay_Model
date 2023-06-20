@@ -63,7 +63,7 @@ class Model():
             running_loss += loss.item()
 
             # Calculate accuracy
-            predicted = (outputs > 0.5).float()  # Convert probabilities to binary predictions
+            predicted = (outputs > 0.7).float()  # Convert probabilities to binary predictions
             correct = torch.sum(predicted == labels).item()
             running_correct += correct
             running_total += labels.numel()
@@ -93,7 +93,7 @@ class Model():
                 outputs = self.model(img)
 
                 # Calculate accuracy
-                predicted = (outputs > 0.5).float()  # Convert probabilities to binary predictions
+                predicted = (outputs > 0.7).float()  # Convert probabilities to binary predictions
                 correct = torch.sum(predicted == labels).item()
                 running_correct += correct
                 running_total += labels.numel()
@@ -118,7 +118,7 @@ class Model():
             outputs = self.model(img)
 
             # Calculate accuracy
-            predicted = (outputs > 0.5).float()  # Convert probabilities to binary predictions
+            predicted = (outputs > 0.7).float()  # Convert probabilities to binary predictions
             correct = torch.sum(predicted == labels).item()
             running_correct += correct
             running_total += labels.numel()
