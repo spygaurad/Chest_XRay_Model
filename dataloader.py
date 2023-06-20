@@ -18,10 +18,11 @@ class ChestXRayDataset(Dataset):
             transforms.Resize((256, 256)),
             transforms.ToTensor()
         ])
-        
+        self.weight_tensor = self._calculate_class_weights()
+
     def __len__(self):
         return len(self.data[:])
-    
+
     def __getitem__(self, index):
         row = self.data[index]
         image_path = os.path.join(self.image_dir, row[0])
@@ -35,7 +36,7 @@ class ChestXRayDataset(Dataset):
             image = torch.rand(3, 256, 256)
 
         return image, label_vector
-    
+
     def _create_class_mapping(self):
         unique_labels = set()
         for row in self.data:
@@ -43,7 +44,7 @@ class ChestXRayDataset(Dataset):
             unique_labels.update(labels)
         class_mapping = {label: i for i, label in enumerate(sorted(unique_labels))}
         return class_mapping
-    
+
     def _create_label_vector(self, labels):
         label_vector = np.zeros(self.num_classes, dtype=np.float32)
         for label in labels:
@@ -51,7 +52,7 @@ class ChestXRayDataset(Dataset):
                 label_index = self.class_mapping[label]
                 label_vector[label_index] = 1.0
         return torch.from_numpy(label_vector)
-    
+
     def _read_csv(self, csv_file):
         data = []
         with open(csv_file, 'r') as file:
@@ -60,6 +61,21 @@ class ChestXRayDataset(Dataset):
             for row in reader:
                 data.append(row)
         return data
+
+    def _calculate_class_weights(self):
+        class_counts = np.zeros(self.num_classes, dtype=np.float32)
+        total_samples = 0
+
+        for _, labels in self.data:
+            labels = labels.split('|')
+            label_vector = self._create_label_vector(labels)
+            class_counts += label_vector.numpy()
+            total_samples += 1
+
+        class_weights = total_samples / (class_counts * self.num_classes)
+        weight_tensor = torch.from_numpy(class_weights).float()
+
+        return weight_tensor
 
 
 
@@ -74,5 +90,9 @@ class ChestXRayDataLoader:
     def load_data(self):
         train_loader = DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True)
         val_loader = DataLoader(self.val_dataset, batch_size=self.batch_size, shuffle=False)
-        test_loader = DataLoader(self.test_dataset, batch_size=1, shuffle=False)  
-        return train_loader, val_loader, test_loader
+        test_loader = DataLoader(self.test_dataset, batch_size=1, shuffle=False)
+
+        # Calculate class weights only for the training dataset
+        class_weights = self.train_dataset.weight_tensor
+
+        return train_loader, val_loader, test_loader, class_weights

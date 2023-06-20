@@ -164,21 +164,9 @@ class Model():
 
         print("Loading Datasets...")
         data_loader = ChestXRayDataLoader(batch_size=BATCH_SIZE)
-        train_data, val_data, test_data = data_loader.load_data()
-
-        # Calculate class imbalance
-        print("Calculating the class imbalance in training dataset and generating a weight...")
-        class_counts = torch.zeros(data_loader.train_dataset.num_classes, device=DEVICE)
-        total_samples = 0
-        for _, (image, labels) in tqdm(enumerate(train_data), total=len(train_data)):
-            labels = labels.to(DEVICE)
-            class_counts += torch.sum(labels, dim=0)
-            total_samples += labels.shape[0]
-
-
-        class_weights = total_samples / (len(train_data) * class_counts)
-        weight_tensor = torch.tensor(class_weights, device=DEVICE)
-
+        train_data, val_data, test_data, class_weights = data_loader.load_data()
+        weight_tensor = class_weights.to(DEVICE)
+        
         print("Dataset Loaded.")
         binaryCrossEntropyLoss = nn.BCEWithLogitsLoss(weight=weight_tensor)
         # bceLoss = nn.BCELoss()
