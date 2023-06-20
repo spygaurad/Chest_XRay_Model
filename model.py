@@ -88,9 +88,9 @@ class Model():
         counter = 0
 
         with torch.no_grad():
-            for i, (img, label) in tqdm(enumerate(dataset), total=len(dataset)):
+            for i, (img, labels) in tqdm(enumerate(dataset), total=len(dataset)):
                 counter += 1
-                img, label = img.to(DEVICE), label.to(DEVICE)
+                img, labels = img.to(DEVICE), labels.to(DEVICE)
                 outputs = self.model(img)
 
                 # Calculate accuracy
@@ -114,9 +114,9 @@ class Model():
         num = random.randint(0, len(dataset)-1)
         self.model.eval()
         # with torch.no_grad():
-        for i, (img, label) in tqdm(enumerate(dataset), total=len(dataset)):
+        for i, (img, labels) in tqdm(enumerate(dataset), total=len(dataset)):
             counter += 1
-            img, label = img.to(DEVICE), label.to(DEVICE)
+            img, labels = img.to(DEVICE), labels.to(DEVICE)
             outputs = self.model(img)
 
             # Calculate accuracy
@@ -135,7 +135,7 @@ class Model():
                 image = (image * 255).astype('uint8')
                 image = Image.fromarray(image)
                 draw = ImageDraw.Draw(image)
-                real_label = self.classes[label[0].argmax().item()]
+                real_label = self.classes[labels[0].argmax().item()]
                 pred_label = self.classes[outputs[0].argmax().item()]
                 draw.text((image.width - 200, 0), f"Real: {real_label}", fill='red')
                 draw.text((image.width - 200, 20), f"Predicted: {pred_label}", fill='blue')
