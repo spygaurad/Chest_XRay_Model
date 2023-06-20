@@ -80,7 +80,6 @@ class Model():
 
 
 
-
     def validate(self, dataset):
 
         self.model.eval()
