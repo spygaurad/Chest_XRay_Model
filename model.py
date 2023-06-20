@@ -162,9 +162,10 @@ class Model():
         train_data, val_data, test_data = data_loader.load_data()
 
         # Calculate class imbalance
+        print("Calculating the class imbalance in training dataset and generating a weight...")
         class_counts = torch.zeros(data_loader.train_dataset.num_classes, device=DEVICE)
         total_samples = 0
-        for (image, labels) in train_data:
+        for (image, labels) in tqdm(enumerate(train_data), total=len(train_data)):
             labels = labels.to(DEVICE)
             class_counts += torch.sum(labels, dim=0)
             total_samples += labels.shape[0]
