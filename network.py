@@ -10,7 +10,6 @@ class EfficientNet(nn.Module):
         self.fc1 = nn.Linear(1024, 512)
         self.fc2 = nn.Linear(512, 64)
         self.classficationLayer = nn.Linear(64, 16)
-        # self.classIndexLayer = nn.Linear(64, 10)
         self.relu = nn.ReLU()
         self.sigmoid = nn.Sigmoid()
     
