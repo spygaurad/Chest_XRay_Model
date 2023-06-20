@@ -27,23 +27,23 @@ class Model():
  
     def __init__(self, trained=False):
         self.model = EfficientNet().to(DEVICE)
-        self.classes =  {   
-                            0: 'Emphysema',
-                            1: 'Pneumothorax',
-                            2: 'Consolidation',
-                            3: 'Pneumonia',
-                            4: 'Edema',
-                            5: 'Hernia',
-                            6: 'Fibrosis',
-                            7: 'Cardiomegaly',
-                            8: 'Mass',
-                            9: 'No Finding',
-                            10: 'Pleural_Thickening',
-                            11: 'Nodule',
-                            12: 'Effusion',
-                            13: 'Atelectasis',
-                            14: 'Infiltration'
-                        }            
+        self.classes =  {
+                'Atelectasis': 0, 
+                'Cardiomegaly': 1, 
+                'Consolidation': 2, 
+                'Edema': 3, 
+                'Effusion': 4, 
+                'Emphysema': 5, 
+                'Fibrosis': 6, 
+                'Hernia': 7, 
+                'Infiltration': 8, 
+                'Mass': 9, 
+                'No Finding': 10, 
+                'Nodule': 11, 
+                'Pleural_Thickening': 12, 
+                'Pneumonia': 13, 
+                'Pneumothorax': 14
+            }       
 
 
     # def psnr(self, reconstructed, original, max_val=1.0): return 20 * torch.log10(max_val / torch.sqrt(F.mse_loss(reconstructed, original)))        
