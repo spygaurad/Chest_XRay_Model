@@ -41,7 +41,6 @@ class ChestXRayDataset(Dataset):
         for row in self.data:
             labels = row[1].split('|')
             unique_labels.update(labels)
-        print(unique_labels)
         class_mapping = {label: i for i, label in enumerate(sorted(unique_labels))}
         return class_mapping
     
@@ -65,7 +64,7 @@ class ChestXRayDataset(Dataset):
 
 
 class ChestXRayDataLoader:
-    def __init__(self, batch_size, num_classes=16):
+    def __init__(self, batch_size, num_classes=14):
         image_dir = f'{root_dir}/images/'
         self.train_dataset = ChestXRayDataset(f'Datasets/multilabel_classification/train.csv', image_dir, num_classes)
         self.val_dataset = ChestXRayDataset(f'Datasets/multilabel_classification/val.csv', image_dir, num_classes)
