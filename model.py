@@ -195,7 +195,7 @@ class Model():
         for epoch in range(1, epochs+1):
 
             print(f"Epoch No: {epoch}")
-            train_loss, train_acc = self.train(dataset=train_data, loss_func=bceLoss, optimizer=optimizer)
+            train_loss, train_acc = self.train(dataset=train_data, loss_func=binaryCrossEntropyLoss, optimizer=optimizer)
             val_acc = self.validate(dataset=val_data)
             train_loss_epochs.append(train_loss)
             val_acc_epochs.append(val_acc)
