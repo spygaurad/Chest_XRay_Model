@@ -166,7 +166,7 @@ class Model():
         data_loader = ChestXRayDataLoader(batch_size=BATCH_SIZE)
         train_data, val_data, test_data, class_weights = data_loader.load_data()
         weight_tensor = class_weights.to(DEVICE)
-        
+
         print("Dataset Loaded.")
         binaryCrossEntropyLoss = nn.BCEWithLogitsLoss(weight=weight_tensor)
         # bceLoss = nn.BCELoss()
@@ -180,7 +180,7 @@ class Model():
         train_loss_epochs, val_acc_epochs, test_acc_epochs = [], [], []
         writer = SummaryWriter(f'runs/{MODEL_NAME}/')
         os.makedirs("checkpoints/", exist_ok=True)
-        os.makedirs("saved_model/", exist_ok=True)
+        os.makedirs(f"{large_file_dir}saved_model/", exist_ok=True)
 
 
         for epoch in range(1, epochs+1):
@@ -196,7 +196,7 @@ class Model():
                 test_acc_epochs.append(test_acc)
                 print(f"Test Accuracy: {test_acc}")
                 print("Saving model")
-                torch.save(self.model.state_dict(), f"saved_model/{MODEL_NAME}_{epoch}.pth")
+                torch.save(self.model.state_dict(), f"{large_file_dir}saved_model/{MODEL_NAME}_{epoch}.pth")
                 print("Model Saved")
                 writer.add_scalar("Accuracy/Test", test_acc, epoch)
 
@@ -208,7 +208,7 @@ class Model():
                 'model_state_dict': self.model.state_dict(),
                 'optimizer_state_dict': optimizer.state_dict(),
                 'train_loss': train_loss,
-                }, f"checkpoints/{MODEL_NAME}.tar")
+                }, f"checkpoints/{MODEL_NAME}_{epoch}.tar")
 
             writer.add_scalar("Loss/train", train_loss, epoch)
             writer.add_scalar("Accuracy/train", train_acc, epoch)
