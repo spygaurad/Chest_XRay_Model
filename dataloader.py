@@ -20,7 +20,7 @@ class ChestXRayDataset(Dataset):
         ])
         
     def __len__(self):
-        return len(self.data[:])
+        return len(self.data[:400])
     
     def __getitem__(self, index):
         row = self.data[index]
@@ -42,6 +42,7 @@ class ChestXRayDataset(Dataset):
             labels = row[1].split('|')
             unique_labels.update(labels)
         class_mapping = {label: i for i, label in enumerate(sorted(unique_labels))}
+        pritn(class_mapping)
         return class_mapping
     
     def _create_label_vector(self, labels):

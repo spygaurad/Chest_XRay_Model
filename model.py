@@ -53,29 +53,30 @@ class Model():
         self.model.train()
         running_loss = 0.0
         running_correct = 0.0
-        counter = 0
+        running_total = 0
 
-        for i, (img, label) in tqdm(enumerate(dataset), total=len(dataset)):
-
-            counter += 1
+        for i, (images, labels) in tqdm(enumerate(dataset), total=len(dataset)):
             optimizer.zero_grad()
-            image, label = img.to(DEVICE), label.to(DEVICE)
-            outputs = self.model(image)
-            loss = loss_func(outputs, label)
+            images, labels = images.to(DEVICE), labels.to(DEVICE)
+            outputs = self.model(images)
+            loss = loss_func(outputs, labels)
             running_loss += loss.item()
+
+            # Calculate accuracy
+            predicted = (outputs > 0.5).float()  # Convert probabilities to binary predictions
+            correct = torch.sum(predicted == labels).item()
+            running_correct += correct
+            running_total += labels.numel()
 
             loss.backward()
             optimizer.step()
 
-            # print(label, pred)
-            correct = outputs.argmax(1) == label.argmax(1)
-            running_correct += correct.sum().item()
-
-        # loss and accuracy for a complete epoch
-        epoch_loss = running_loss / (counter*BATCH_SIZE)
-        epoch_acc = 100. * (running_correct / (counter*BATCH_SIZE))
+        # Calculate metrics for the epoch
+        epoch_loss = running_loss / len(dataset)
+        epoch_acc = (running_correct / running_total) * 100
 
         return epoch_loss, epoch_acc
+
 
 
 
@@ -92,9 +93,11 @@ class Model():
                 img, label = img.to(DEVICE), label.to(DEVICE)
                 outputs = self.model(img)
 
-                #calculate accuracy
-                correct = outputs.argmax(1) == label.argmax(1)
-                running_correct += correct.sum().item()
+                # Calculate accuracy
+                predicted = (outputs > 0.5).float()  # Convert probabilities to binary predictions
+                correct = torch.sum(predicted == labels).item()
+                running_correct += correct
+                running_total += labels.numel()
 
         # loss and accuracy for a complete epoch
         epoch_acc = 100. * (running_correct / (counter*BATCH_SIZE))
@@ -115,13 +118,16 @@ class Model():
             counter += 1
             img, label = img.to(DEVICE), label.to(DEVICE)
             outputs = self.model(img)
-            #calculate accuracy
-            correct = outputs.argmax(1) == label.argmax(1)
-            running_correct += correct.sum().item()
+
+            # Calculate accuracy
+            predicted = (outputs > 0.5).float()  # Convert probabilities to binary predictions
+            correct = torch.sum(predicted == labels).item()
+            running_correct += correct
+            running_total += labels.numel()
             
             if i == num:
                 try:
-                    os.makedirs(f"saved_samples/{MODEL_NAME}", exist_ok=True)
+                    os.makedirs(f"{large_file_dir}saved_samples/{MODEL_NAME}", exist_ok=True)
                 except:
                     pass
                 # sample = random.randint(0, BATCH_SIZE//2)
@@ -133,7 +139,7 @@ class Model():
                 pred_label = self.classes[outputs[0].argmax().item()]
                 draw.text((image.width - 200, 0), f"Real: {real_label}", fill='red')
                 draw.text((image.width - 200, 20), f"Predicted: {pred_label}", fill='blue')
-                image.save(f"saved_samples/{MODEL_NAME}/{epoch}.jpg")
+                image.save(f"{large_file_dir}saved_samples/{MODEL_NAME}/{epoch}.jpg")
 
         # loss and accuracy for a complete epoch
         epoch_acc = 100. * (running_correct / (counter))
@@ -158,21 +164,21 @@ class Model():
         data_loader = ChestXRayDataLoader(batch_size=BATCH_SIZE)
         train_data, val_data, test_data = data_loader.load_data()
 
-        # # Calculate class imbalance
-        # class_counts = torch.zeros(data_loader.train_dataset.num_classes, device=DEVICE)
-        # total_samples = 0
-        # for (image, labels) in train_data:
-        #     labels = labels.to(DEVICE)
-        #     class_counts += torch.sum(labels, dim=0)
-        #     total_samples += labels.shape[0]
+        # Calculate class imbalance
+        class_counts = torch.zeros(data_loader.train_dataset.num_classes, device=DEVICE)
+        total_samples = 0
+        for (image, labels) in train_data:
+            labels = labels.to(DEVICE)
+            class_counts += torch.sum(labels, dim=0)
+            total_samples += labels.shape[0]
 
 
-        # class_weights = total_samples / (len(train_data) * class_counts)
-        # weight_tensor = torch.tensor(class_weights, device=DEVICE)
+        class_weights = total_samples / (len(train_data) * class_counts)
+        weight_tensor = torch.tensor(class_weights, device=DEVICE)
 
         print("Dataset Loaded.")
-        # binaryCrossEntropyLoss = nn.BCEWithLogitsLoss(weight=weight_tensor)
-        bceLoss = nn.BCELoss()
+        binaryCrossEntropyLoss = nn.BCEWithLogitsLoss(weight=weight_tensor)
+        # bceLoss = nn.BCELoss()
         # mseloss = nn.MSELoss()
 
 
