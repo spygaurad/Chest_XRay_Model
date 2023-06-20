@@ -122,21 +122,26 @@ class Model():
             running_correct += correct
             running_total += labels.numel()
             
-            if i == num:
-                try:
-                    os.makedirs(f"{large_file_dir}saved_samples/{MODEL_NAME}", exist_ok=True)
-                except:
-                    pass
-                # sample = random.randint(0, BATCH_SIZE//2)
-                image = img[0, :, :, :].cpu().numpy().transpose((1, 2, 0))
-                image = (image * 255).astype('uint8')
-                image = Image.fromarray(image)
-                draw = ImageDraw.Draw(image)
-                real_label = self.classes[labels[0].argmax().item()]
-                pred_label = self.classes[outputs[0].argmax().item()]
-                draw.text((image.width - 200, 0), f"Real: {real_label}", fill='red')
-                draw.text((image.width - 200, 20), f"Predicted: {pred_label}", fill='blue')
-                image.save(f"{large_file_dir}saved_samples/{MODEL_NAME}/{epoch}.jpg")
+            # if i == num:
+            #     try:
+            #         os.makedirs(f"{large_file_dir}saved_samples/{MODEL_NAME}", exist_ok=True)
+            #     except:
+            #         pass
+            #     # sample = random.randint(0, BATCH_SIZE//2)
+            #     image = img[0, :, :, :].cpu().numpy().transpose((1, 2, 0))
+            #     image = (image * 255).astype('uint8')
+            #     image = Image.fromarray(image)
+            #     draw = ImageDraw.Draw(image)
+
+
+
+
+            #     #debug this part
+            #     real_label = self.classes[labels[0].argmax().item()]
+            #     pred_label = self.classes[outputs[0].argmax().item()]
+            #     draw.text((image.width - 200, 0), f"Real: {real_label}", fill='red')
+            #     draw.text((image.width - 200, 20), f"Predicted: {pred_label}", fill='blue')
+            #     image.save(f"{large_file_dir}saved_samples/{MODEL_NAME}/{epoch}.jpg")
 
         # loss and accuracy for a complete epoch
         epoch_acc = (running_correct / running_total) * 100
