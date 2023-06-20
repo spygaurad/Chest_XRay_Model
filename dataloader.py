@@ -41,8 +41,8 @@ class ChestXRayDataset(Dataset):
         for row in self.data:
             labels = row[1].split('|')
             unique_labels.update(labels)
+        print(unique_labels)
         class_mapping = {label: i for i, label in enumerate(sorted(unique_labels))}
-        print(class_mapping)
         return class_mapping
     
     def _create_label_vector(self, labels):
