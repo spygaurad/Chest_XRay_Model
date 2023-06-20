@@ -85,11 +85,10 @@ class Model():
 
         self.model.eval()
         running_correct = 0.0
-        counter = 0
+        running_total = 0
 
         with torch.no_grad():
             for i, (img, labels) in tqdm(enumerate(dataset), total=len(dataset)):
-                counter += 1
                 img, labels = img.to(DEVICE), labels.to(DEVICE)
                 outputs = self.model(img)
 
@@ -109,13 +108,12 @@ class Model():
 
         # self.model.load_state_dict(torch.load('saved_model/TOMATO_LEAF_PLANTVILLAGE_EFFICIENTNET_10CLASSES_V1_3_200.pth'))
         running_correct = 0.0
-        counter = 0
+        running_total = 0
 
         num = random.randint(0, len(dataset)-1)
         self.model.eval()
         # with torch.no_grad():
         for i, (img, labels) in tqdm(enumerate(dataset), total=len(dataset)):
-            counter += 1
             img, labels = img.to(DEVICE), labels.to(DEVICE)
             outputs = self.model(img)
 
