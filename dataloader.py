@@ -66,7 +66,8 @@ class ChestXRayDataset(Dataset):
         class_counts = np.zeros(self.num_classes, dtype=np.float32)
         total_samples = 0
 
-        for _, labels in self.data:
+        for instance in self.data:
+            labels = instance[1]
             labels = labels.split('|')
             label_vector = self._create_label_vector(labels)
             class_counts += label_vector.numpy()
