@@ -17,7 +17,7 @@ class EfficientNet(nn.Module):
         x = self.relu(self.fc1(x))
         return  self.sigmoid(self.classficationLayer(x))
 
-inp = torch.rand((1, 3, 256, 256))
-model = EfficientNet()
-out = model(inp)
-print(out.shape)
+# inp = torch.rand((1, 3, 256, 256))
+# model = EfficientNet()
+# out = model(inp)
+# print(out.shape)
