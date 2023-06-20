@@ -100,7 +100,7 @@ class Model():
                 running_total += labels.numel()
 
         # loss and accuracy for a complete epoch
-        epoch_acc = 100. * (running_correct / (counter*BATCH_SIZE))
+        epoch_acc = (running_correct / running_total) * 100
         return epoch_acc
 
 
@@ -142,7 +142,7 @@ class Model():
                 image.save(f"{large_file_dir}saved_samples/{MODEL_NAME}/{epoch}.jpg")
 
         # loss and accuracy for a complete epoch
-        epoch_acc = 100. * (running_correct / (counter))
+        epoch_acc = (running_correct / running_total) * 100
     
         return epoch_acc
 
