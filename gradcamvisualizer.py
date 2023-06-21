@@ -115,7 +115,7 @@ for class_idx, prob in enumerate(output.squeeze()):
         target_class = torch.eye(len(output.squeeze()))[class_idx].unsqueeze(0).to(DEVICE)
 
         # Backward pass to obtain Grad-CAM
-        grad_cam.backward(target_class)
+        grad_cam.backward(features)
 
         # Generate the heatmap
         heatmap = grad_cam.generate_heatmap(grad_cam)
