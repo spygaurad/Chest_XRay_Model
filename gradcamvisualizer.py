@@ -33,6 +33,9 @@ class GradCAM:
         return self.model(input_image)
 
     def backward(self, target_class):
+        if self.gradient is None:
+            raise RuntimeError("Gradient is not available. Make sure to call forward() before backward().")
+
         gradients = torch.mean(self.gradient, dim=(2, 3))
         target_feature_map = self.feature_map
         weights = torch.sum(gradients * target_feature_map, dim=1)
@@ -55,6 +58,7 @@ class GradCAM:
         grad_cam = grad_cam / torch.max(grad_cam)
 
         return grad_cam
+
 
     def generate_heatmap(self, grad_cam):
         heatmap = cv2.applyColorMap(np.uint8(255 * grad_cam.cpu()), cv2.COLORMAP_JET)
