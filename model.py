@@ -58,7 +58,7 @@ class Model():
         for i, (images, labels) in tqdm(enumerate(dataset), total=len(dataset)):
             optimizer.zero_grad()
             images, labels = images.to(DEVICE), labels.to(DEVICE)
-            outputs = self.model(images)
+            _, outputs = self.model(images)
             loss = loss_func(outputs, labels)
             running_loss += loss.item()
 
@@ -89,7 +89,7 @@ class Model():
         with torch.no_grad():
             for i, (img, labels) in tqdm(enumerate(dataset), total=len(dataset)):
                 img, labels = img.to(DEVICE), labels.to(DEVICE)
-                outputs = self.model(img)
+                _, outputs = self.model(img)
 
                 # Calculate accuracy
                 predicted = (outputs > 0.7).float()  # Convert probabilities to binary predictions
@@ -114,7 +114,7 @@ class Model():
         # with torch.no_grad():
         for i, (img, labels) in tqdm(enumerate(dataset), total=len(dataset)):
             img, labels = img.to(DEVICE), labels.to(DEVICE)
-            outputs = self.model(img)
+            _, outputs = self.model(img)
 
             # Calculate accuracy
             predicted = (outputs > 0.7).float()  # Convert probabilities to binary predictions
