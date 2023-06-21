@@ -8,16 +8,21 @@ import csv
 
 root_dir = '/home/optimus/Downloads/Dataset/ChestXRays/NIH/'
 
+from torchvision import transforms
+import torch
+import csv
+import os
+import numpy as np
+from PIL import Image
+
 class ChestXRayDataset(Dataset):
     def __init__(self, csv_file, image_dir, num_classes):
         self.data = self._read_csv(csv_file)
         self.image_dir = image_dir
         self.num_classes = num_classes
         self.class_mapping = self._create_class_mapping()
-        self.transform = transforms.Compose([
-            transforms.Resize((256, 256)),
-            transforms.ToTensor()
-        ])
+        self.mean, self.std = self._calculate_mean_std()
+        self.transform = self._create_transform()
         self.weight_tensor = self._calculate_class_weights()
 
     def __len__(self):
@@ -62,6 +67,38 @@ class ChestXRayDataset(Dataset):
                 data.append(row)
         return data
 
+    def _calculate_mean_std(self):
+        total_samples = len(self.data)
+        mean = np.zeros(3)
+        std = np.zeros(3)
+
+        for instance in self.data:
+            image_path = os.path.join(self.image_dir, instance[0])
+            try:
+                image = Image.open(image_path).convert('RGB')
+                image = np.array(image)
+                mean += np.mean(image, axis=(0, 1))
+                std += np.std(image, axis=(0, 1))
+            except (OSError, IOError):
+                continue
+
+        mean /= total_samples
+        std /= total_samples
+
+        return mean, std
+
+    def _create_transform(self):
+        transform = transforms.Compose([
+            transforms.Resize((256, 256)),
+            transforms.RandomHorizontalFlip(),
+            transforms.RandomRotation(10),
+            transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2),
+            transforms.RandomCrop((224, 224)),
+            transforms.ToTensor(),
+            transforms.Normalize(self.mean.tolist(), self.std.tolist())
+        ])
+        return transform
+
     def _calculate_class_weights(self):
         class_counts = np.zeros(self.num_classes, dtype=np.float32)
         total_samples = 0
@@ -77,6 +114,7 @@ class ChestXRayDataset(Dataset):
         weight_tensor = torch.from_numpy(class_weights).float()
 
         return weight_tensor
+
 
 
 
