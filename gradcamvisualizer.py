@@ -11,6 +11,7 @@ import torch.nn.functional as F
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
+
 class GradCAM:
     def __init__(self, model, target_layer):
         self.model = model
@@ -70,6 +71,7 @@ class GradCAM:
 
 model = EfficientNet().to(DEVICE)
 model.load_state_dict(torch.load('/mnt/media/wiseyak/Chest_XRays/saved_model/EfficientNet_1_25.pth', map_location=DEVICE))
+model.eval()
 
 csv_file = 'Datasets/multilabel_classification/test.csv'
 with open(csv_file, 'r') as file:
@@ -91,21 +93,29 @@ preprocess = transforms.Compose([
 ])
 input_tensor = preprocess(image).unsqueeze(0).to(DEVICE)
 
+# Choose the target layer for Grad-CAM
+target_layer = model.effnet
+
 # Create the Grad-CAM object
-grad_cam = GradCAM(model, model.effnet)
+grad_cam = GradCAM(model, target_layer)
+
 
 # Forward pass through the model
-output = grad_cam.forward(input_tensor)
+features, output = model(input_tensor)
 
-# Backward pass to obtain Grad-CAM
-grad_cam.backward(target_class=output.argmax())
+# Apply Grad-CAM for each target class with probability > 0.7
+threshold = 0.7
+for class_idx, prob in enumerate(output.squeeze()):
+    if prob > threshold:
+        # Backward pass to obtain Grad-CAM
+        grad_cam.backward(class_idx)
 
-# Generate the heatmap
-heatmap = grad_cam.generate_heatmap(grad_cam)
+        # Generate the heatmap
+        heatmap = grad_cam.generate_heatmap(grad_cam)
 
-# Overlay the heatmap on the original image
-overlay = grad_cam.overlay_heatmap(image, heatmap)
+        # Overlay the heatmap on the original image
+        overlay = grad_cam.overlay_heatmap(image, heatmap)
 
-# Save the visualization images
-heatmap.save('heatmap.jpg')
-overlay.save('overlay.jpg')
+        # Save the visualization images
+        heatmap.save(f'heatmap_class_{class_idx}.jpg')
+        overlay.save(f'overlay_class_{class_idx}.jpg')
