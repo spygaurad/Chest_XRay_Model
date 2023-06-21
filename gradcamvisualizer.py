@@ -2,6 +2,7 @@ import torch
 from torch.autograd import Function
 import cv2
 import numpy as np
+from network import EfficientNet
 
 
 class GradCAM:
