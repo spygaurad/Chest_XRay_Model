@@ -65,7 +65,7 @@ class GradCAM:
 
 # Usage example
 model = EfficientNet().to(DEVICE)
-model.load_state_dict(torch.load('saved_model/EfficientNet_11.pth', map_location=DEVICE))
+model.load_state_dict(torch.load('/mnt/media/wiseyak/Chest_XRays/saved_model/EfficientNet_1_25.pth', map_location=DEVICE))
 
 # Load the image and preprocess it
 image = PilImage.open(f'/home/optimus/Downloads/Dataset/ChestXRays/NIH/images/{image_path}').convert('RGB')
