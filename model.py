@@ -156,6 +156,7 @@ class Model():
 
         print("Initializing Parameters...")
         self.model = self.model.to(DEVICE)
+        # model.load_state_dict(torch.load('/mnt/media/wiseyak/Chest_XRays/saved_model/EfficientNet_1_25.pth', map_location=DEVICE))
         total_params = sum(p.numel() for p in self.model.parameters())
         print("Total parameters of the model is: {:.2f}{}".format(total_params / 10**(3 * min(len(str(total_params)) // 3, len(["", "K", "M", "B", "T"]) - 1)), ["", "K", "M", "B", "T"][min(len(str(total_params)) // 3, len(["", "K", "M", "B", "T"]) - 1)]))
 
