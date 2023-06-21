@@ -3,6 +3,11 @@ from torch.autograd import Function
 import cv2
 import numpy as np
 from network import EfficientNet
+from torchvision import transforms
+from PIL import Image
+import csv
+import random
+import torch.nn.functional as F
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -68,7 +73,7 @@ model = EfficientNet().to(DEVICE)
 model.load_state_dict(torch.load('/mnt/media/wiseyak/Chest_XRays/saved_model/EfficientNet_1_25.pth', map_location=DEVICE))
 
 # Load the image and preprocess it
-image = PilImage.open(f'/home/optimus/Downloads/Dataset/ChestXRays/NIH/images/{image_path}').convert('RGB')
+image = Image.open(f'/home/optimus/Downloads/Dataset/ChestXRays/NIH/images/{image_path}').convert('RGB')
 preprocess = transforms.Compose([
     transforms.Resize((256, 256)),
     transforms.ToTensor()
