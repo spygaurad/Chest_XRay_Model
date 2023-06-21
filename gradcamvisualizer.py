@@ -74,7 +74,7 @@ class GradCAM:
 
 
 model = EfficientNet().to(DEVICE)
-model.load_state_dict(torch.load('/mnt/media/wiseyak/Chest_XRays/saved_model/EfficientNet_1_25.pth', map_location=DEVICE))
+# model.load_state_dict(torch.load('/mnt/media/wiseyak/Chest_XRays/saved_model/EfficientNet_1_25.pth', map_location=DEVICE))
 model.eval()
 
 csv_file = 'Datasets/multilabel_classification/test.csv'
