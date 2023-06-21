@@ -27,6 +27,19 @@ image_path = random_row[0]
 # Load the image
 image = Image.open(f'/home/optimus/Downloads/Dataset/ChestXRays/NIH/images/{image_path}').convert('RGB')
 
+# Load the image
+image = Image.open(f'/home/optimus/Downloads/Dataset/ChestXRays/NIH/images/{image_path}').convert('RGB')
+
+# Preprocess the image
+preprocess = transforms.Compose([
+    transforms.Resize((256, 256)),
+    transforms.ToTensor()
+])
+
+input_tensor = preprocess(image)
+input_batch = input_tensor.unsqueeze(0)
+input_batch = input_batch.to(DEVICE)
+
 # Forward pass
 model.eval()
 with torch.no_grad():
