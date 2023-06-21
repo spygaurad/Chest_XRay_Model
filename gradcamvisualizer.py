@@ -9,7 +9,7 @@ import csv
 import random
 import torch.nn.functional as F
 
-DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+DEVICE = "cpu"
 
 
 class GradCAM:
