@@ -33,20 +33,20 @@ class GradCAM:
         return self.model(input_image)
 
     def backward(self, target_class):
-        gradients = torch.mean(self.gradient, dim=(2, 3))[0]
-        target_feature_map = self.feature_map[0]
-        weights = torch.sum(gradients * target_feature_map, dim=0)
+        gradients = torch.mean(self.gradient, dim=(2, 3))
+        target_feature_map = self.feature_map
+        weights = torch.sum(gradients * target_feature_map, dim=1)
         weights = torch.relu(weights)
 
         # Perform global average pooling on the weights
         weights = torch.mean(weights, dim=(1, 2))
 
         # Expand dimensions for compatibility with the feature map size
-        weights = weights.unsqueeze(0).unsqueeze(2).unsqueeze(3)
+        weights = weights.unsqueeze(1).unsqueeze(2)
 
         # Obtain the weighted combination of the feature maps
-        grad_cam = torch.sum(weights * target_feature_map, dim=1).squeeze(0)
-
+        grad_cam = torch.sum(weights * target_feature_map, dim=0)
+        
         # Apply ReLU to eliminate negative values
         grad_cam = torch.relu(grad_cam)
 
