@@ -111,8 +111,11 @@ features, output = model(input_tensor)
 threshold = 0.0
 for class_idx, prob in enumerate(output.squeeze()):
     if prob > threshold:
+        # Convert class_idx to one-hot encoded tensor
+        target_class = torch.eye(len(output.squeeze()))[class_idx].unsqueeze(0).to(DEVICE)
+
         # Backward pass to obtain Grad-CAM
-        grad_cam.backward(class_idx)
+        grad_cam.backward(target_class)
 
         # Generate the heatmap
         heatmap = grad_cam.generate_heatmap(grad_cam)
