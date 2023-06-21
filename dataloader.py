@@ -67,25 +67,6 @@ class ChestXRayDataset(Dataset):
                 data.append(row)
         return data
 
-    def _calculate_mean_std(self):
-        total_samples = len(self.data)
-        mean = np.zeros(3)
-        std = np.zeros(3)
-
-        for instance in self.data:
-            image_path = os.path.join(self.image_dir, instance[0])
-            try:
-                image = Image.open(image_path).convert('RGB')
-                image = np.array(image)
-                mean += np.mean(image, axis=(0, 1))
-                std += np.std(image, axis=(0, 1))
-            except (OSError, IOError):
-                continue
-
-        mean /= total_samples
-        std /= total_samples
-
-        return mean, std
 
     def _create_transform(self):
         transform = transforms.Compose([
@@ -95,7 +76,6 @@ class ChestXRayDataset(Dataset):
             transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2),
             transforms.RandomCrop((224, 224)),
             transforms.ToTensor(),
-            transforms.Normalize(self.mean.tolist(), self.std.tolist())
         ])
         return transform
 
