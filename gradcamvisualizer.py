@@ -1,94 +1,93 @@
 import torch
-from torchvision import transforms
-from PIL import Image
-import csv
-import random
-import torch.nn.functional as F
+from torch.autograd import Function
+import cv2
+import numpy as np
 
-from network import EfficientNet
 
-DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+class GradCAM:
+    def __init__(self, model, target_layer):
+        self.model = model
+        self.target_layer = target_layer
+        self.feature_map = None
+        self.gradient = None
+        self.model.eval()
 
+        def backward_hook(module, grad_input, grad_output):
+            self.gradient = grad_output[0]
+
+        def forward_hook(module, input, output):
+            self.feature_map = output.detach()
+
+        target_layer.register_forward_hook(forward_hook)
+        target_layer.register_backward_hook(backward_hook)
+
+    def forward(self, input_image):
+        return self.model(input_image)
+
+    def backward(self, target_class):
+        gradients = torch.mean(self.gradient, dim=(2, 3))[0]
+        target_feature_map = self.feature_map[0]
+        weights = torch.sum(gradients * target_feature_map, dim=0)
+        weights = torch.relu(weights)
+
+        # Perform global average pooling on the weights
+        weights = torch.mean(weights, dim=(1, 2))
+
+        # Expand dimensions for compatibility with the feature map size
+        weights = weights.unsqueeze(0).unsqueeze(2).unsqueeze(3)
+
+        # Obtain the weighted combination of the feature maps
+        grad_cam = torch.sum(weights * target_feature_map, dim=1).squeeze(0)
+
+        # Apply ReLU to eliminate negative values
+        grad_cam = torch.relu(grad_cam)
+
+        # Normalize the grad_cam values between 0 and 1
+        grad_cam = grad_cam - torch.min(grad_cam)
+        grad_cam = grad_cam / torch.max(grad_cam)
+
+        return grad_cam
+
+    def generate_heatmap(self, grad_cam):
+        heatmap = cv2.applyColorMap(np.uint8(255 * grad_cam.cpu()), cv2.COLORMAP_JET)
+        heatmap = torch.from_numpy(heatmap).permute(2, 0, 1).float() / 255
+        return heatmap
+
+    def overlay_heatmap(self, image, heatmap, alpha=0.5):
+        image = np.array(image)
+        overlay = np.uint8(255 * heatmap.cpu().numpy()).transpose(1, 2, 0)
+        overlay = cv2.cvtColor(overlay, cv2.COLOR_RGB2BGR)
+        output = cv2.addWeighted(image, 1 - alpha, overlay, alpha, 0)
+        return output
+
+
+# Usage example
 model = EfficientNet().to(DEVICE)
-model.load_state_dict(torch.load('/mnt/media/wiseyak/Chest_XRays/saved_model/EfficientNet_1_25.pth', map_location=torch.device(DEVICE)))
+model.load_state_dict(torch.load('saved_model/EfficientNet_11.pth', map_location=DEVICE))
 
-
-csv_file = 'Datasets/multilabel_classification/test.csv'
-with open(csv_file, 'r') as file:
-    reader = csv.reader(file)
-    next(reader)  # Skip the header row
-    rows = list(reader)
-    random_row = random.choice(rows)
-
-# Get the image path from the first column of the random row
-image_path = random_row[0]
-
-
-# Load the image
-image = Image.open(f'/home/optimus/Downloads/Dataset/ChestXRays/NIH/images/{image_path}').convert('RGB')
-
-# Load the image
-image = Image.open(f'/home/optimus/Downloads/Dataset/ChestXRays/NIH/images/{image_path}').convert('RGB')
-
-# Preprocess the image
+# Load the image and preprocess it
+image = PilImage.open(f'/home/optimus/Downloads/Dataset/ChestXRays/NIH/images/{image_path}').convert('RGB')
 preprocess = transforms.Compose([
     transforms.Resize((256, 256)),
     transforms.ToTensor()
 ])
+input_tensor = preprocess(image).unsqueeze(0).to(DEVICE)
 
-input_tensor = preprocess(image)
-input_batch = input_tensor.unsqueeze(0)
-input_batch = input_batch.to(DEVICE)
+# Create the Grad-CAM object
+grad_cam = GradCAM(model, model.effnet)
 
-# Forward pass
-model.eval()
-with torch.no_grad():
-    features, output = model(input_batch)
+# Forward pass through the model
+output = grad_cam.forward(input_tensor)
 
+# Backward pass to obtain Grad-CAM
+grad_cam.backward(target_class=output.argmax())
 
-# Calculate gradients
-grads = torch.autograd.grad(output, features)[0]
+# Generate the heatmap
+heatmap = grad_cam.generate_heatmap(grad_cam)
 
+# Overlay the heatmap on the original image
+overlay = grad_cam.overlay_heatmap(image, heatmap)
 
-# Global average pooling of the gradients
-weights = torch.mean(grads, dim=(2, 3))
-
-# Resize the weights to match the feature map size
-weights = weights[:, :, None, None]
-weights = F.interpolate(weights, size=(input_batch.size(2), input_batch.size(3)), mode='bilinear', align_corners=False)
-
-# Normalize the weights
-weights = F.relu(weights)
-weights /= torch.max(weights)
-
-
-# Compute the weighted combination of the features
-gradcam = torch.sum(features * weights, dim=1, keepdim=True)
-
-# Apply ReLU to focus on the positive contributions
-gradcam = F.relu(gradcam)
-
-# Normalize the Grad-CAM
-gradcam /= torch.max(gradcam)
-
-# Convert Grad-CAM to an RGB image
-gradcam = gradcam.repeat(1, 3, 1, 1)
-gradcam = gradcam.detach().cpu().numpy()[0]
-gradcam = Image.fromarray((gradcam * 255).astype('uint8'))
-
-
-# Resize the original image to Grad-CAM size
-image = image.resize((gradcam.size[1], gradcam.size[0]))
-
-# Convert the image to RGBA
-image_rgba = image.convert('RGBA')
-
-# Convert the Grad-CAM to RGBA with transparency
-gradcam_rgba = gradcam.convert('RGBA')
-
-# Blend the images using alpha compositing
-overlay = Image.alpha_composite(image_rgba, gradcam_rgba)
-
-
-gradcam.save('gradcam.jpg')
+# Save the visualization images
+heatmap.save('heatmap.jpg')
 overlay.save('overlay.jpg')
