@@ -13,7 +13,7 @@ model = EfficientNet().to(DEVICE)
 model.load_state_dict(torch.load('/mnt/media/wiseyak/Chest_XRays/saved_model/EfficientNet_1_25.pth', map_location=torch.device(DEVICE)))
 
 
-csv_file = '/home/optimus/Downloads/Dataset/ChestXRays/NIH/test.csv'
+csv_file = 'Datasets/multilabel_classification/test.csv'
 with open(csv_file, 'r') as file:
     reader = csv.reader(file)
     next(reader)  # Skip the header row
