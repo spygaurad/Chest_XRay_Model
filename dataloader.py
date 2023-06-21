@@ -26,7 +26,7 @@ class ChestXRayDataset(Dataset):
         self.weight_tensor = self._calculate_class_weights()
 
     def __len__(self):
-        return len(self.data[:int((len(data)) * 0.3)])
+        return len(self.data[:int((len(self.data)) * 0.3)])
 
     def __getitem__(self, index):
         row = self.data[index]
