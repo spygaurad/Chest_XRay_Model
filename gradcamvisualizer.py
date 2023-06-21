@@ -10,7 +10,7 @@ from network import EfficientNet
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 model = EfficientNet().to(DEVICE)
-model.load_state_dict(torch.load('mnt/media/wiseyak/Chest_XRay_Model/saved_model/EfficientNet_11.pth', map_location=torch.device(DEVICE)))
+model.load_state_dict(torch.load('mnt/media/wiseyak/Chest_XRays/saved_model/EfficientNet_1_25.pth', map_location=torch.device(DEVICE)))
 
 
 csv_file = '/home/optimus/Downloads/Dataset/ChestXRays/NIH/test.csv'
