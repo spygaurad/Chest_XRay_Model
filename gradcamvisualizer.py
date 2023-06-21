@@ -68,9 +68,20 @@ class GradCAM:
         return output
 
 
-# Usage example
 model = EfficientNet().to(DEVICE)
 model.load_state_dict(torch.load('/mnt/media/wiseyak/Chest_XRays/saved_model/EfficientNet_1_25.pth', map_location=DEVICE))
+
+csv_file = '/home/optimus/Downloads/Dataset/ChestXRays/NIH/test.csv'
+with open(csv_file, 'r') as file:
+    reader = csv.reader(file)
+    next(reader)  # Skip the header row
+    rows = list(reader)
+    random_row = random.choice(rows)
+
+# Get the image path from the first column of the random row
+image_path = random_row[0]
+
+
 
 # Load the image and preprocess it
 image = Image.open(f'/home/optimus/Downloads/Dataset/ChestXRays/NIH/images/{image_path}').convert('RGB')
