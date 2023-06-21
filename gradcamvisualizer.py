@@ -4,6 +4,7 @@ import cv2
 import numpy as np
 from network import EfficientNet
 
+DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 class GradCAM:
     def __init__(self, model, target_layer):
