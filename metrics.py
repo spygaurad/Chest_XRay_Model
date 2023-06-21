@@ -55,3 +55,57 @@ class MixedLoss(nn.Module):
     l2_loss = nn.MSELoss()(y_pred, y_true)
     # return the mixed loss
     return self.alpha*msssim_loss + self.beta*l2_loss
+
+
+
+
+class YOLOLoss(nn.Module):
+    def __init__(self, num_classes, lambda_coord=5.0, lambda_noobj=0.5):
+        super(YOLOLoss, self).__init__()
+        self.num_classes = num_classes
+        self.lambda_coord = lambda_coord
+        self.lambda_noobj = lambda_noobj
+
+        self.mse_loss = nn.MSELoss()
+        self.bce_loss = nn.BCELoss()
+
+    def forward(self, predictions, targets):
+        batch_size, S, S, _ = predictions.shape
+        B = 1  # Assuming a single bounding box prediction per grid cell
+
+        # Extract target values
+        target_coords = targets[..., :4].view(batch_size, S, S, B, 4)
+        target_confs = targets[..., 4:5].view(batch_size, S, S, B, 1)
+        target_classes = targets[..., 5:].view(batch_size, S, S, B, self.num_classes)
+
+        # Extract prediction values
+        pred_coords = predictions[..., :4].view(batch_size, S, S, B, 4)
+        pred_confs = predictions[..., 4:5].view(batch_size, S, S, B, 1)
+        pred_classes = predictions[..., 5:].view(batch_size, S, S, B, self.num_classes)
+
+        # Calculate localization loss (MSE between predicted and target bounding box coordinates)
+        coord_loss = self.mse_loss(pred_coords, target_coords)
+
+        # Calculate confidence loss for object detection
+        obj_mask = target_confs.squeeze(-1)  # Mask for cells containing objects
+        noobj_mask = 1.0 - obj_mask  # Mask for cells without objects
+
+        # Object confidence loss (MSE between predicted and target object confidence scores)
+        obj_conf_loss = self.mse_loss(pred_confs[obj_mask], target_confs[obj_mask])
+
+        # No-object confidence loss (MSE between predicted and target object confidence scores)
+        noobj_conf_loss = self.mse_loss(pred_confs[noobj_mask], target_confs[noobj_mask])
+
+        # Calculate class loss (binary cross-entropy loss between predicted and target class probabilities)
+        class_loss = self.bce_loss(pred_classes[obj_mask], target_classes[obj_mask])
+
+        # Calculate total YOLO loss
+        total_loss = (
+            self.lambda_coord * coord_loss +
+            obj_conf_loss +
+            self.lambda_noobj * noobj_conf_loss +
+            class_loss
+        )
+
+        return total_loss
+

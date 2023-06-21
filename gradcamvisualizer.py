@@ -1,26 +1,18 @@
-import json
 import torch
 from torchvision import transforms
-from PIL import Image as PilImage
-from omnixai.data.image import Image
-from omnixai.explainers.vision.specific.gradcam.pytorch.gradcam import GradCAM
+from PIL import Image
 import csv
-import random 
+import random
+import torch.nn.functional as F
 
 from network import EfficientNet
 
-
-# If available, move the input tensors to the GPU
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-
-
-# Load the pre-trained model
 model = EfficientNet().to(DEVICE)
 model.load_state_dict(torch.load('saved_model/EfficientNet_11.pth', map_location=torch.device(DEVICE)))
 
 
-# Load the test.csv file and select a random row
 csv_file = '/home/optimus/Downloads/Dataset/ChestXRays/NIH/test.csv'
 with open(csv_file, 'r') as file:
     reader = csv.reader(file)
@@ -31,32 +23,59 @@ with open(csv_file, 'r') as file:
 # Get the image path from the first column of the random row
 image_path = random_row[0]
 
+
 # Load the image
-image = PilImage.open(f'/home/optimus/Downloads/Dataset/ChestXRays/NIH/images/{image_path}').convert('RGB')
+image = Image.open(f'/home/optimus/Downloads/Dataset/ChestXRays/NIH/images/{image_path}').convert('RGB')
 
-# Preprocess the image
-preprocess = transforms.Compose([
-    transforms.Resize((256, 256)),
-    transforms.ToTensor()
-])
+# Forward pass
+model.eval()
+with torch.no_grad():
+    features, output = model(input_batch)
 
-input_tensor = preprocess(image)
-input_batch = input_tensor.unsqueeze(0)
 
-input_batch = input_batch.to(DEVICE)
+# Calculate gradients
+grads = torch.autograd.grad(output, features)[0]
 
-# Load the Grad-CAM explainer
-explainer = GradCAM(model=model, target_layer=model.classficationLayer, preprocess_function=preprocess)
 
-# Perform Grad-CAM
-gradcam_map = explainer.explain(input_batch)
+# Global average pooling of the gradients
+weights = torch.mean(grads, dim=(2, 3))
 
-# Convert the Grad-CAM map to a heatmap image
-heatmap = explainer.heatmap(gradcam_map)
+# Resize the weights to match the feature map size
+weights = weights[:, :, None, None]
+weights = F.interpolate(weights, size=(input_batch.size(2), input_batch.size(3)), mode='bilinear', align_corners=False)
 
-# Overlay the heatmap on the original image
-overlay = explainer.overlay_heatmap(image, heatmap)
+# Normalize the weights
+weights = F.relu(weights)
+weights /= torch.max(weights)
 
-# Save the visualization images
-heatmap.save('heatmap.jpg')
+
+# Compute the weighted combination of the features
+gradcam = torch.sum(features * weights, dim=1, keepdim=True)
+
+# Apply ReLU to focus on the positive contributions
+gradcam = F.relu(gradcam)
+
+# Normalize the Grad-CAM
+gradcam /= torch.max(gradcam)
+
+# Convert Grad-CAM to an RGB image
+gradcam = gradcam.repeat(1, 3, 1, 1)
+gradcam = gradcam.detach().cpu().numpy()[0]
+gradcam = Image.fromarray((gradcam * 255).astype('uint8'))
+
+
+# Resize the original image to Grad-CAM size
+image = image.resize((gradcam.size[1], gradcam.size[0]))
+
+# Convert the image to RGBA
+image_rgba = image.convert('RGBA')
+
+# Convert the Grad-CAM to RGBA with transparency
+gradcam_rgba = gradcam.convert('RGBA')
+
+# Blend the images using alpha compositing
+overlay = Image.alpha_composite(image_rgba, gradcam_rgba)
+
+
+gradcam.save('gradcam.jpg')
 overlay.save('overlay.jpg')
