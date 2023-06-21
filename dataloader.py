@@ -21,7 +21,6 @@ class ChestXRayDataset(Dataset):
         self.image_dir = image_dir
         self.num_classes = num_classes
         self.class_mapping = self._create_class_mapping()
-        self.mean, self.std = self._calculate_mean_std()
         self.transform = self._create_transform()
         self.weight_tensor = self._calculate_class_weights()
 
