@@ -234,4 +234,4 @@ class Model():
 
 
 model = Model()
-model.fit(250, 1e-5)
+model.fit(250, 1e-6)
