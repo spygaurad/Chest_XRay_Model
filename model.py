@@ -160,7 +160,7 @@ class Model():
         print("Total parameters of the model is: {:.2f}{}".format(total_params / 10**(3 * min(len(str(total_params)) // 3, len(["", "K", "M", "B", "T"]) - 1)), ["", "K", "M", "B", "T"][min(len(str(total_params)) // 3, len(["", "K", "M", "B", "T"]) - 1)]))
 
         print(f"Initializing the Optimizer")
-        optimizer = optim.Adam(self.model.parameters(), lr)
+        optimizer = optim.AdamW(self.model.parameters(), lr)
 
         print("Loading Datasets...")
         data_loader = ChestXRayDataLoader(batch_size=BATCH_SIZE)
@@ -233,4 +233,4 @@ class Model():
 
 
 model = Model()
-model.fit(250, 1e-3)
+model.fit(250, 1e-5)
