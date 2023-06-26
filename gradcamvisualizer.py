@@ -9,7 +9,7 @@ import csv
 import random
 import torch.nn.functional as F
 
-DEVICE = "cpu"
+DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 
 class GradCAM:
@@ -23,16 +23,14 @@ class GradCAM:
         def backward_hook(module, grad_input, grad_output):
             self.gradient = grad_output[0]
 
-
         def forward_hook(module, input, output):
             self.feature_map = output.detach()
 
+        target_layer.register_full_backward_hook(backward_hook)
         target_layer.register_forward_hook(forward_hook)
-        target_layer.register_backward_hook(backward_hook)
 
     def forward(self, input_image):
         return self.model(input_image)
-
 
     def backward(self, target_class):
         if self.gradient is None:
@@ -63,8 +61,6 @@ class GradCAM:
             # Save the visualization images
             heatmap.save(f'heatmap_class_{class_idx}.jpg')
             overlay.save(f'overlay_class_{class_idx}.jpg')
-
-
 
     def generate_heatmap(self, grad_cam):
         heatmap = cv2.applyColorMap(np.uint8(255 * grad_cam.cpu()), cv2.COLORMAP_JET)
