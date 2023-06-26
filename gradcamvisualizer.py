@@ -23,6 +23,7 @@ class GradCAM:
         def backward_hook(module, grad_input, grad_output):
             self.gradient = grad_output[0]
 
+
         def forward_hook(module, input, output):
             self.feature_map = output.detach()
 
@@ -32,32 +33,37 @@ class GradCAM:
     def forward(self, input_image):
         return self.model(input_image)
 
+
     def backward(self, target_class):
         if self.gradient is None:
             raise RuntimeError("Gradient is not available. Make sure to call forward() before backward().")
 
         gradients = torch.mean(self.gradient, dim=(2, 3))
         target_feature_map = self.feature_map
-        weights = torch.sum(gradients * target_feature_map, dim=1)
-        weights = torch.relu(weights)
 
-        # Perform global average pooling on the weights
-        weights = torch.mean(weights, dim=(1, 2))
+        for class_idx, class_label in enumerate(target_class):
+            weights = torch.sum(gradients * target_feature_map * class_label, dim=1)
+            weights = torch.relu(weights)
 
-        # Expand dimensions for compatibility with the feature map size
-        weights = weights.unsqueeze(1).unsqueeze(2)
+            # Perform global average pooling on the weights
+            weights = torch.mean(weights, dim=(1, 2))
 
-        # Obtain the weighted combination of the feature maps
-        grad_cam = torch.sum(weights * target_feature_map, dim=0)
-        
-        # Apply ReLU to eliminate negative values
-        grad_cam = torch.relu(grad_cam)
+            # Expand dimensions for compatibility with the feature map size
+            weights = weights.unsqueeze(1).unsqueeze(2)
 
-        # Normalize the grad_cam values between 0 and 1
-        grad_cam = grad_cam - torch.min(grad_cam)
-        grad_cam = grad_cam / torch.max(grad_cam)
+            # Obtain the weighted combination of the feature maps
+            grad_cam = torch.sum(weights * target_feature_map, dim=0)
 
-        return grad_cam
+            # Generate the heatmap
+            heatmap = grad_cam.generate_heatmap(grad_cam)
+
+            # Overlay the heatmap on the original image
+            overlay = grad_cam.overlay_heatmap(image, heatmap)
+
+            # Save the visualization images
+            heatmap.save(f'heatmap_class_{class_idx}.jpg')
+            overlay.save(f'overlay_class_{class_idx}.jpg')
+
 
 
     def generate_heatmap(self, grad_cam):
@@ -108,7 +114,7 @@ grad_cam = GradCAM(model, target_layer)
 features, output = model(input_tensor)
 
 # Apply Grad-CAM for each target class with probability > 0.7
-threshold = 0.0
+threshold = 0.6
 for class_idx, prob in enumerate(output.squeeze()):
     if prob > threshold:
         # Convert class_idx to one-hot encoded tensor
