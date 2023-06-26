@@ -104,7 +104,7 @@ grad_cam = GradCAM(model, target_layer)
 
 
 # Forward pass through the model
-features, output = model(input_tensor)
+features, output = grad_cam.forward(input_tensor)
 
 # Apply Grad-CAM for each target class with probability > 0.7
 threshold = 0.5
