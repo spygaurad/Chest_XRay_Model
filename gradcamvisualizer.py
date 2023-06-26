@@ -97,7 +97,7 @@ preprocess = transforms.Compose([
 input_tensor = preprocess(image).unsqueeze(0).to(DEVICE)
 
 # Choose the target layer for Grad-CAM
-target_layer = model.fc1
+target_layer = model.classficationLayer
 
 # Create the Grad-CAM object
 grad_cam = GradCAM(model, target_layer)
