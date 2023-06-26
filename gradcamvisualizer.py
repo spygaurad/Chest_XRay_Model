@@ -110,7 +110,7 @@ grad_cam = GradCAM(model, target_layer)
 features, output = model(input_tensor)
 
 # Apply Grad-CAM for each target class with probability > 0.7
-threshold = 0.6
+threshold = 0.5
 for class_idx, prob in enumerate(output.squeeze()):
     if prob > threshold:
         # Convert class_idx to one-hot encoded tensor
