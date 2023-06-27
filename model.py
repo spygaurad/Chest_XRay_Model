@@ -5,8 +5,7 @@ from metrics import DiceLoss, MixedLoss
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import random
-import os
+import os, csv, random
 from PIL import Image, ImageDraw
 from tqdm import tqdm
 import torch.nn.functional as F
@@ -216,6 +215,7 @@ class Model():
                 writer.writerow([f'Class {i}'] + list(conf_matrix[i]))
 
         return conf_matrix, f1
+
 
  
 
