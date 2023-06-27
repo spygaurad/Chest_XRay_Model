@@ -109,7 +109,7 @@ class ChestXRayDataLoader:
     def load_data(self):
         train_loader = DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True)
         val_loader = DataLoader(self.val_dataset, batch_size=self.batch_size, shuffle=False)
-        test_loader = DataLoader(self.test_dataset, batch_size=1, shuffle=False)
+        test_loader = DataLoader(self.test_dataset, batch_size=self.batch_size, shuffle=False)
 
         # Calculate class weights only for the training dataset
         class_weights = self.train_dataset.weight_tensor
