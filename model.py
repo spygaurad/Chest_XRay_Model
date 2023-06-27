@@ -178,6 +178,8 @@ class Model():
 
 
 
+import csv
+
     def test(self, dataset, epoch):
         running_total = 0
         true_labels = []
@@ -215,16 +217,18 @@ class Model():
             class_names = ['Class ' + str(i+1) for i in range(conf_matrix.shape[0])]
             writer.writerow(class_names)
 
-            # Write TP, TN, FP, FN values for each class
+            # Write TP, FP, FN, TN values for each class
             for i in range(conf_matrix.shape[0]):
                 tp = conf_matrix[i][1][1]
-                tn = conf_matrix[i][0][0]
                 fp = conf_matrix[i][0][1]
                 fn = conf_matrix[i][1][0]
-                writer.writerow([tp, tn] + [fp, fn] * (conf_matrix.shape[0]-1))
+                tn = conf_matrix[i][0][0]
+                writer.writerow([tp, fp] + [tp, fn] * (conf_matrix.shape[0]-1))
+                writer.writerow([fn, tn] + [fp, tn] * (conf_matrix.shape[0]-1))
 
             # Write empty line for the next epoch
             writer.writerow([])
+
 
 
 
