@@ -4,6 +4,7 @@ from metrics import DiceLoss, MixedLoss
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import torch.optim as optim
 import numpy as np
 import os, csv, random
@@ -69,7 +70,7 @@ class Model():
         weight_tensor = class_weights.to(DEVICE)
 
         print("Dataset Loaded.")
-        binaryCrossEntropyLoss = nn.BCELoss(weight=weight_tensor)
+        binaryCrossEntropyLoss = nn.BCEWithLogitsLoss(weight=weight_tensor)
         # bceLoss = nn.BCELoss()
         # mseloss = nn.MSELoss()
 
@@ -139,6 +140,7 @@ class Model():
             loss = loss_func(outputs, labels)
             running_loss += loss.item()
 
+            outputs = F.sigmoid(outputs)
             predicted = (outputs > 0.7).float()  # Convert probabilities to binary predictions
             true_labels.extend(labels.cpu().numpy())
             predicted_labels.extend(predicted.cpu().numpy())
@@ -171,6 +173,7 @@ class Model():
                 img, labels = img.to(DEVICE), labels.to(DEVICE)
                 _, outputs = self.model(img)
 
+                outputs = F.sigmoid(outputs)
                 predicted = (outputs > 0.7).float()  # Convert probabilities to binary predictions
                 true_labels.extend(labels.cpu().numpy())
                 predicted_labels.extend(predicted.cpu().numpy())
@@ -199,6 +202,7 @@ class Model():
                 img, labels = img.to(DEVICE), labels.to(DEVICE)
                 _, outputs = self.model(img)
 
+                outputs = F.sigmoid(outputs)
                 predicted = (outputs > 0.7).float()  # Convert probabilities to binary predictions
                 true_labels.extend(labels.cpu().numpy())
                 predicted_labels.extend(predicted.cpu().numpy())
