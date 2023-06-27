@@ -147,7 +147,7 @@ class Model():
 
         # Calculate metrics for the epoch
         epoch_loss = running_loss / len(dataset)
-        f1 = f1_score(true_labels, predicted_labels, average='macro')
+        f1 = f1_score(true_labels_binary, predicted_labels_binary, average='macro', zero_division=0)
 
         return epoch_loss, f1
 
@@ -172,7 +172,7 @@ class Model():
                 running_total += labels.numel()
 
         # Calculate F1 score
-        f1 = f1_score(true_labels, predicted_labels, average='macro')
+        f1 = f1_score(true_labels_binary, predicted_labels_binary, average='macro', zero_division=0)
 
         return f1
 
@@ -205,7 +205,7 @@ class Model():
         # Calculate confusion matrix
         conf_matrix = multilabel_confusion_matrix(true_labels_binary, predicted_labels_binary)
 
-        f1 = f1_score(true_labels, predicted_labels, average='macro')
+        f1 = f1_score(true_labels_binary, predicted_labels_binary, average='macro', zero_division=0)
 
         # Save confusion matrix to CSV file
         with open('confusion_matrix.csv', 'a', newline='') as csvfile:
