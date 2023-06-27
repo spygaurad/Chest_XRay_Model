@@ -68,7 +68,6 @@ class Model():
         data_loader = ChestXRayDataLoader(batch_size=BATCH_SIZE)
         train_data, val_data, test_data, class_weights = data_loader.load_data()
         weight_tensor = class_weights.to(DEVICE)
-        
 
         print("Dataset Loaded.")
         binaryCrossEntropyLoss = nn.BCELoss(weight=weight_tensor)
