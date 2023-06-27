@@ -21,8 +21,8 @@ from tensorboardX import SummaryWriter
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # DEVICE = "cpu"
-BATCH_SIZE = 16
-MODEL_NAME = "EfficientNet_1"
+BATCH_SIZE = 64
+MODEL_NAME = "EfficientNet_1_1"
 large_file_dir = '/mnt/media/wiseyak/Chest_XRay_Model/'
 
 
