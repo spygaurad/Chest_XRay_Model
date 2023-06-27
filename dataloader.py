@@ -74,7 +74,6 @@ class ChestXRayDataset(Dataset):
             transforms.RandomHorizontalFlip(),
             transforms.RandomRotation(10),
             transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2),
-            transforms.RandomCrop((224, 224)),
             transforms.ToTensor(),
         ])
         return transform
