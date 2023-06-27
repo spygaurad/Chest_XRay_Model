@@ -206,6 +206,8 @@ import csv
         # Calculate confusion matrix
         conf_matrix = multilabel_confusion_matrix(true_labels_binary, predicted_labels_binary)
 
+        f1 = f1_score(true_labels, predicted_labels, average='macro')
+
         # Save confusion matrix to CSV file
         with open('confusion_matrix.csv', 'a', newline='') as csvfile:
             writer = csv.writer(csvfile)
@@ -228,6 +230,8 @@ import csv
 
             # Write empty line for the next epoch
             writer.writerow([])
+
+            return conf_matrix, f1
 
 
 
