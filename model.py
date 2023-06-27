@@ -155,6 +155,7 @@ class Model():
         predicted_labels_binary = np.array(predicted_labels)
         f1 = f1_score(true_labels_binary, predicted_labels_binary, average='macro', zero_division=0)
 
+        return epoch_loss, f1
       
 
 
