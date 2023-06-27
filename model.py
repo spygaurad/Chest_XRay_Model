@@ -23,7 +23,7 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # DEVICE = "cpu"
 BATCH_SIZE = 16
 MODEL_NAME = "EfficientNet_1"
-large_file_dir = '/mnt/media/wiseyak/Chest_XRays/'
+large_file_dir = '/mnt/media/wiseyak/Chest_XRay_Model/'
 
 
 class Model():
