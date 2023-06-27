@@ -254,7 +254,7 @@ class Model():
 
 
 
-model = Model(trained=True)
+model = Model(trained=False)
 model.fit(250, 1e-3)
 # data_loader = ChestXRayDataLoader(batch_size=BATCH_SIZE)
 # train_data, val_data, test_data, class_weights = data_loader.load_data()
