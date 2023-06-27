@@ -27,6 +27,7 @@ class Model():
  
     def __init__(self, trained=False):
         self.model = EfficientNet().to(DEVICE)
+        if trained: self.model.load_state_dict(torch.load('/mnt/media/wiseyak/Chest_XRays/saved_model/EfficientNet_1_35.pth'))
         self.classes =  {
                 'Atelectasis': 0, 
                 'Cardiomegaly': 1, 
@@ -233,5 +234,6 @@ class Model():
 
 
 
-model = Model()
-model.fit(250, 1e-6)
+model = Model(trained=True)
+train_data, val_data, test_data, class_weights = data_loader.load_data()
+model.test(dataset=test_data, epoch=0)
