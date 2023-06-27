@@ -15,7 +15,7 @@ class EfficientNet(nn.Module):
     def forward(self, x):
         features = self.effnet(x)
         x = self.fc1(features)
-        return  features, self.classficationLayer(x)
+        return  features, self.sigmoid(self.classficationLayer(x))
 
 # inp = torch.rand((1, 3, 256, 256))
 # model = EfficientNet()
