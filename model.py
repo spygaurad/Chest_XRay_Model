@@ -70,7 +70,7 @@ class Model():
         weight_tensor = class_weights.to(DEVICE)
 
         print("Dataset Loaded.")
-        binaryCrossEntropyLoss = nn.BCELoss(weight=weight_tensor)
+        binaryCrossEntropyLoss = nn.BCELoss()
         # bceLoss = nn.BCELoss()
         # mseloss = nn.MSELoss()
 
