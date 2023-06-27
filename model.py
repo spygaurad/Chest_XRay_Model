@@ -10,7 +10,7 @@ from PIL import Image, ImageDraw
 from tqdm import tqdm
 import torch.nn.functional as F
 import torchvision.transforms.functional as trF
-from sklearn.metrics import confusion_matrix, f1_score
+from sklearn.metrics import multilabel_confusion_matrix, f1_score
 from tensorboardX import SummaryWriter
 
 
@@ -196,11 +196,15 @@ class Model():
 
                 running_total += labels.numel()
 
+        # Convert labels to binary format
+        true_labels_binary = np.array(true_labels)
+        predicted_labels_binary = np.array(predicted_labels)
+
         # Calculate confusion matrix
-        conf_matrix = confusion_matrix(true_labels, predicted_labels)
+        conf_matrix = multilabel_confusion_matrix(true_labels_binary, predicted_labels_binary)
 
         # Calculate F1 score
-        f1 = f1_score(true_labels, predicted_labels, average='macro')
+        f1 = f1_score(true_labels_binary, predicted_labels_binary, average='macro')
 
         # Save confusion matrix to CSV file
         with open('confusion_matrix.csv', 'a', newline='') as file:
@@ -212,7 +216,7 @@ class Model():
             writer.writerow([f'Epoch {epoch + 1}'])
             writer.writerow([''] + [f'Class {i}' for i in range(len(conf_matrix))])
             for i in range(len(conf_matrix)):
-                writer.writerow([f'Class {i}'] + list(conf_matrix[i]))
+                writer.writerow([f'Class {i}'] + list(conf_matrix[i].ravel()))
 
         return conf_matrix, f1
 
