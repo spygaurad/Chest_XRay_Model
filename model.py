@@ -95,13 +95,13 @@ class Model():
             if epoch%5==0:
                 test_confmtx, test_f1 = self.test(dataset=test_data, epoch=epoch)
                 test_f1_epochs.append(test_f1)
-                print(f"Test Accuracy: {test_f1}")
+                print(f"Test F1: {test_f1}")
                 print("Saving model")
                 torch.save(self.model.state_dict(), f"{large_file_dir}saved_model/{MODEL_NAME}_{epoch}.pth")
                 print("Model Saved")
-                writer.add_scalar("Accuracy/Test", test_f1, epoch)
+                writer.add_scalar("F1/Test", test_f1, epoch)
 
-            print(f"Train Loss:{train_loss}, Train Accuracy:{train_f1}, Validation Accuracy:{val_f1}")
+            print(f"Train Loss:{train_loss}, Train F1:{train_f1}, Validation F1:{val_f1}")
 
             if max(val_f1_epochs) == val_f1:
                 torch.save({
@@ -112,8 +112,8 @@ class Model():
                 }, f"checkpoints/{MODEL_NAME}_{epoch}.tar")
 
             writer.add_scalar("Loss/train", train_loss, epoch)
-            writer.add_scalar("Accuracy/train", train_f1, epoch)
-            writer.add_scalar("Accuracy/val", val_f1, epoch)
+            writer.add_scalar("F1/train", train_f1, epoch)
+            writer.add_scalar("F1/val", val_f1, epoch)
             
     
             print("Epoch Completed. Proceeding to next epoch...")
@@ -205,6 +205,8 @@ class Model():
         # Calculate confusion matrix
         conf_matrix = multilabel_confusion_matrix(true_labels_binary, predicted_labels_binary)
 
+        f1 = f1_score(true_labels, predicted_labels, average='macro')
+
         # Save confusion matrix to CSV file
         with open('confusion_matrix.csv', 'a', newline='') as csvfile:
             writer = csv.writer(csvfile)
@@ -227,7 +229,7 @@ class Model():
             # Write empty line for the next epoch
             writer.writerow([])
 
-        return 
+        return conf_matrix, f1
 
 
 
