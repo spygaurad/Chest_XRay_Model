@@ -202,10 +202,7 @@ class Model():
         predicted_labels_binary = np.array(predicted_labels)
 
         # Calculate confusion matrix
-        num_classes = true_labels_binary.shape[1]
-        conf_matrix = np.zeros((num_classes, 2, 2), dtype=np.int64)
-        for i in range(num_classes):
-            conf_matrix[i] = multilabel_confusion_matrix(true_labels_binary[:, i], predicted_labels_binary[:, i])
+        conf_matrix = multilabel_confusion_matrix(true_labels_binary, predicted_labels_binary)
 
         # Calculate F1 score
         f1 = f1_score(true_labels_binary, predicted_labels_binary, average='macro')
@@ -218,8 +215,8 @@ class Model():
             else:
                 writer.writerow([])
             writer.writerow([f'Epoch {epoch + 1}'])
-            writer.writerow([''] + [f'Class {i}' for i in range(num_classes)])
-            for i in range(num_classes):
+            writer.writerow([''] + [f'Class {i}' for i in range(len(conf_matrix))])
+            for i in range(len(conf_matrix)):
                 writer.writerow([f'Class {i}'] + list(conf_matrix[i].ravel()))
 
         return conf_matrix, f1
