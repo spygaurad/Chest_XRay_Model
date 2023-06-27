@@ -178,8 +178,6 @@ class Model():
 
 
 
-import csv
-
     def test(self, dataset, epoch):
         running_total = 0
         true_labels = []
