@@ -20,7 +20,7 @@ from tensorboardX import SummaryWriter
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # DEVICE = "cpu"
-BATCH_SIZE = 1
+BATCH_SIZE = 16
 MODEL_NAME = "EfficientNet_1"
 large_file_dir = '/mnt/media/wiseyak/Chest_XRays/'
 
@@ -69,7 +69,7 @@ class Model():
         weight_tensor = class_weights.to(DEVICE)
 
         print("Dataset Loaded.")
-        binaryCrossEntropyLoss = nn.BCEWithLogitsLoss()
+        binaryCrossEntropyLoss = nn.BCELoss(weight=weight_tensor)
         # bceLoss = nn.BCELoss()
         # mseloss = nn.MSELoss()
 
