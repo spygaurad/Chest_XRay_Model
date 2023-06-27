@@ -178,6 +178,7 @@ class Model():
 
 
 
+
     def test(self, dataset, epoch):
         running_total = 0
         true_labels = []
@@ -213,7 +214,7 @@ class Model():
 
             # Write confusion matrix
             writer.writerow(['True/Predicted'] + [f'Class {i+1}' for i in range(conf_matrix.shape[0])])
-            writer.writerow([''] + ['TP', 'FP', 'FN', 'TN'] * conf_matrix.shape[0])
+            writer.writerow([''] + ['TP', 'FP', 'FN', 'TN'])
 
             for i in range(conf_matrix.shape[0]):
                 class_name = f'Class {i+1}'
@@ -226,10 +227,9 @@ class Model():
             # Write empty line for the next epoch
             writer.writerow([])
 
+        return 
 
 
-
- 
 
 
 
