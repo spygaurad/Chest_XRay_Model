@@ -1,3 +1,7 @@
+from network import EfficientNet
+from dataloader import ChestXRayDataLoader
+from metrics import DiceLoss, MixedLoss
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -7,11 +11,9 @@ from PIL import Image, ImageDraw
 from tqdm import tqdm
 import torch.nn.functional as F
 import torchvision.transforms.functional as trF
+from sklearn.metrics import confusion_matrix, f1_score
 from tensorboardX import SummaryWriter
 
-from network import EfficientNet
-from dataloader import ChestXRayDataLoader
-from metrics import DiceLoss, MixedLoss
 
 # from omnixai.data.image import Image as IM
 # from omnixai.explainers.vision.specific.gradcam.pytorch.gradcam import GradCAM
@@ -49,109 +51,6 @@ class Model():
 
     # def psnr(self, reconstructed, original, max_val=1.0): return 20 * torch.log10(max_val / torch.sqrt(F.mse_loss(reconstructed, original)))        
 
-
-    def train(self, dataset, loss_func, optimizer):
-        self.model.train()
-        running_loss = 0.0
-        running_correct = 0.0
-        running_total = 0
-
-        for i, (images, labels) in tqdm(enumerate(dataset), total=len(dataset)):
-            optimizer.zero_grad()
-            images, labels = images.to(DEVICE), labels.to(DEVICE)
-            _, outputs = self.model(images)
-            loss = loss_func(outputs, labels)
-            running_loss += loss.item()
-
-            # Calculate accuracy
-            predicted = (outputs > 0.7).float()  # Convert probabilities to binary predictions
-            correct = torch.sum(predicted == labels).item()
-            running_correct += correct
-            running_total += labels.numel()
-
-            loss.backward()
-            optimizer.step()
-
-        # Calculate metrics for the epoch
-        epoch_loss = running_loss / len(dataset)
-        epoch_acc = (running_correct / running_total) * 100
-
-        return epoch_loss, epoch_acc
-
-
-
-
-    def validate(self, dataset):
-
-        self.model.eval()
-        running_correct = 0.0
-        running_total = 0
-
-        with torch.no_grad():
-            for i, (img, labels) in tqdm(enumerate(dataset), total=len(dataset)):
-                img, labels = img.to(DEVICE), labels.to(DEVICE)
-                _, outputs = self.model(img)
-
-                # Calculate accuracy
-                predicted = (outputs > 0.7).float()  # Convert probabilities to binary predictions
-                correct = torch.sum(predicted == labels).item()
-                running_correct += correct
-                running_total += labels.numel()
-
-        # loss and accuracy for a complete epoch
-        epoch_acc = (running_correct / running_total) * 100
-        return epoch_acc
-
-
-
-    def test(self, dataset, epoch):
-
-        # self.model.load_state_dict(torch.load('saved_model/TOMATO_LEAF_PLANTVILLAGE_EFFICIENTNET_10CLASSES_V1_3_200.pth'))
-        running_correct = 0.0
-        running_total = 0
-
-        num = random.randint(0, len(dataset)-1)
-        self.model.eval()
-        # with torch.no_grad():
-        for i, (img, labels) in tqdm(enumerate(dataset), total=len(dataset)):
-            img, labels = img.to(DEVICE), labels.to(DEVICE)
-            _, outputs = self.model(img)
-
-            # Calculate accuracy
-            predicted = (outputs > 0.7).float()  # Convert probabilities to binary predictions
-            correct = torch.sum(predicted == labels).item()
-            running_correct += correct
-            running_total += labels.numel()
-            
-            # if i == num:
-            #     try:
-            #         os.makedirs(f"{large_file_dir}saved_samples/{MODEL_NAME}", exist_ok=True)
-            #     except:
-            #         pass
-            #     # sample = random.randint(0, BATCH_SIZE//2)
-            #     image = img[0, :, :, :].cpu().numpy().transpose((1, 2, 0))
-            #     image = (image * 255).astype('uint8')
-            #     image = Image.fromarray(image)
-            #     draw = ImageDraw.Draw(image)
-
-
-
-
-            #     #debug this part
-            #     real_label = self.classes[labels[0].argmax().item()]
-            #     pred_label = self.classes[outputs[0].argmax().item()]
-            #     draw.text((image.width - 200, 0), f"Real: {real_label}", fill='red')
-            #     draw.text((image.width - 200, 20), f"Predicted: {pred_label}", fill='blue')
-            #     image.save(f"{large_file_dir}saved_samples/{MODEL_NAME}/{epoch}.jpg")
-
-        # loss and accuracy for a complete epoch
-        epoch_acc = (running_correct / running_total) * 100
-    
-        return epoch_acc
-
-
-
- 
     def fit(self, epochs, lr):
         print(f"Using {DEVICE} device...")
 
@@ -220,6 +119,95 @@ class Model():
             print("Epoch Completed. Proceeding to next epoch...")
 
         print(f"Training Completed for {epochs} epochs.")
+
+
+    def train(self, dataset, loss_func, optimizer):
+        self.model.train()
+        running_loss = 0.0
+        running_total = 0
+        true_labels = []
+        predicted_labels = []
+
+        for i, (images, labels) in tqdm(enumerate(dataset), total=len(dataset)):
+            optimizer.zero_grad()
+            images, labels = images.to(DEVICE), labels.to(DEVICE)
+            _, outputs = self.model(images)
+            loss = loss_func(outputs, labels)
+            running_loss += loss.item()
+
+            predicted = (outputs > 0.7).float()  # Convert probabilities to binary predictions
+            true_labels.extend(labels.cpu().numpy())
+            predicted_labels.extend(predicted.cpu().numpy())
+
+            running_total += labels.numel()
+
+            loss.backward()
+            optimizer.step()
+
+        # Calculate metrics for the epoch
+        epoch_loss = running_loss / len(dataset)
+        f1 = f1_score(true_labels, predicted_labels, average='macro')
+
+        return epoch_loss, f1
+
+
+
+
+    def validate(self, dataset):
+        self.model.eval()
+        running_total = 0
+        true_labels = []
+        predicted_labels = []
+
+        with torch.no_grad():
+            for i, (img, labels) in tqdm(enumerate(dataset), total=len(dataset)):
+                img, labels = img.to(DEVICE), labels.to(DEVICE)
+                _, outputs = self.model(img)
+
+                predicted = (outputs > 0.7).float()  # Convert probabilities to binary predictions
+                true_labels.extend(labels.cpu().numpy())
+                predicted_labels.extend(predicted.cpu().numpy())
+
+                running_total += labels.numel()
+
+        # Calculate F1 score
+        f1 = f1_score(true_labels, predicted_labels, average='macro')
+
+        return f1
+
+
+
+    def test(self, dataset, epoch):
+        running_total = 0
+        true_labels = []
+        predicted_labels = []
+
+        num = random.randint(0, len(dataset)-1)
+        self.model.eval()
+
+        with torch.no_grad():
+            for i, (img, labels) in tqdm(enumerate(dataset), total=len(dataset)):
+                img, labels = img.to(DEVICE), labels.to(DEVICE)
+                _, outputs = self.model(img)
+
+                predicted = (outputs > 0.7).float()  # Convert probabilities to binary predictions
+                true_labels.extend(labels.cpu().numpy())
+                predicted_labels.extend(predicted.cpu().numpy())
+
+                running_total += labels.numel()
+
+        # Calculate confusion matrix
+        conf_matrix = confusion_matrix(true_labels, predicted_labels)
+
+        # Calculate F1 score
+        f1 = f1_score(true_labels, predicted_labels, average='macro')
+
+        return conf_matrix, f1
+
+
+
+ 
+
 
 
     def infer_a_sample(self, image):
