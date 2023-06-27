@@ -122,6 +122,9 @@ class Model():
 
 
 
+
+
+
     def train(self, dataset, loss_func, optimizer):
         self.model.train()
         running_loss = 0.0
@@ -147,10 +150,12 @@ class Model():
 
         # Calculate metrics for the epoch
         epoch_loss = running_loss / len(dataset)
+
+        true_labels_binary = np.array(true_labels)
+        predicted_labels_binary = np.array(predicted_labels)
         f1 = f1_score(true_labels_binary, predicted_labels_binary, average='macro', zero_division=0)
 
-        return epoch_loss, f1
-
+      
 
 
 
@@ -175,7 +180,6 @@ class Model():
         f1 = f1_score(true_labels_binary, predicted_labels_binary, average='macro', zero_division=0)
 
         return f1
-
 
 
 
