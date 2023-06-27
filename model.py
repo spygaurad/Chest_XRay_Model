@@ -78,7 +78,7 @@ class Model():
 
 
         # mseloss = nn.MSELoss()
-        train_loss_epochs, val_acc_epochs, test_acc_epochs = [], [], []
+        train_loss_epochs, val_f1_epochs, test_f1_epochs = [], [], []
         writer = SummaryWriter(f'runs/{MODEL_NAME}/')
         os.makedirs("checkpoints/", exist_ok=True)
         os.makedirs(f"{large_file_dir}saved_model/", exist_ok=True)
@@ -87,23 +87,23 @@ class Model():
         for epoch in range(1, epochs+1):
 
             print(f"Epoch No: {epoch}")
-            train_loss, train_acc = self.train(dataset=train_data, loss_func=binaryCrossEntropyLoss, optimizer=optimizer)
-            val_acc = self.validate(dataset=val_data)
+            train_loss, train_f1 = self.train(dataset=train_data, loss_func=binaryCrossEntropyLoss, optimizer=optimizer)
+            val_f1 = self.validate(dataset=val_data)
             train_loss_epochs.append(train_loss)
-            val_acc_epochs.append(val_acc)
+            val_f1_epochs.append(val_f1)
 
             if epoch%5==0:
-                test_acc = self.test(dataset=test_data, epoch=epoch)
-                test_acc_epochs.append(test_acc)
-                print(f"Test Accuracy: {test_acc}")
+                test_confmtx, test_f1 = self.test(dataset=test_data, epoch=epoch)
+                test_f1_epochs.append(test_f1)
+                print(f"Test Accuracy: {test_f1}")
                 print("Saving model")
                 torch.save(self.model.state_dict(), f"{large_file_dir}saved_model/{MODEL_NAME}_{epoch}.pth")
                 print("Model Saved")
-                writer.add_scalar("Accuracy/Test", test_acc, epoch)
+                writer.add_scalar("Accuracy/Test", test_f1, epoch)
 
-            print(f"Train Loss:{train_loss}, Train Accuracy:{train_acc}, Validation Accuracy:{val_acc}")
+            print(f"Train Loss:{train_loss}, Train Accuracy:{train_f1}, Validation Accuracy:{val_f1}")
 
-            if max(val_acc_epochs) == val_acc:
+            if max(val_f1_epochs) == val_f1:
                 torch.save({
                 'epoch': epoch,
                 'model_state_dict': self.model.state_dict(),
@@ -112,13 +112,14 @@ class Model():
                 }, f"checkpoints/{MODEL_NAME}_{epoch}.tar")
 
             writer.add_scalar("Loss/train", train_loss, epoch)
-            writer.add_scalar("Accuracy/train", train_acc, epoch)
-            writer.add_scalar("Accuracy/val", val_acc, epoch)
+            writer.add_scalar("Accuracy/train", train_f1, epoch)
+            writer.add_scalar("Accuracy/val", val_f1, epoch)
             
     
             print("Epoch Completed. Proceeding to next epoch...")
 
         print(f"Training Completed for {epochs} epochs.")
+
 
 
     def train(self, dataset, loss_func, optimizer):
@@ -182,7 +183,7 @@ class Model():
         true_labels = []
         predicted_labels = []
 
-        num = random.randint(0, len(dataset)-1)
+        num = random.randint(0, len(dataset) - 1)
         self.model.eval()
 
         with torch.no_grad():
@@ -202,9 +203,19 @@ class Model():
         # Calculate F1 score
         f1 = f1_score(true_labels, predicted_labels, average='macro')
 
+        # Save confusion matrix to CSV file
+        with open('confusion_matrix.csv', 'a', newline='') as file:
+            writer = csv.writer(file)
+            if epoch == 0:
+                writer.writerow(['Epoch'])
+            else:
+                writer.writerow([])
+            writer.writerow([f'Epoch {epoch + 1}'])
+            writer.writerow([''] + [f'Class {i}' for i in range(len(conf_matrix))])
+            for i in range(len(conf_matrix)):
+                writer.writerow([f'Class {i}'] + list(conf_matrix[i]))
+
         return conf_matrix, f1
-
-
 
  
 
