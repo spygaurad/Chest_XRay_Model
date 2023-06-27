@@ -29,7 +29,7 @@ class Model():
  
     def __init__(self, trained=False):
         self.model = EfficientNet().to(DEVICE)
-        if trained: self.model.load_state_dict(torch.load('/mnt/media/wiseyak/Chest_XRays/saved_model/EfficientNet_1_35.pth'))
+        if trained: self.model.load_state_dict(torch.load('checkpoints/EfficientNet_1_35.tar')['model_state_dict'])
         self.classes =  {
                 'Atelectasis': 0, 
                 'Cardiomegaly': 1, 
