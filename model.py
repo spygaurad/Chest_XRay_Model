@@ -204,22 +204,28 @@ class Model():
         # Calculate confusion matrix
         conf_matrix = multilabel_confusion_matrix(true_labels_binary, predicted_labels_binary)
 
-        # Calculate F1 score
-        f1 = f1_score(true_labels_binary, predicted_labels_binary, average='macro')
-
         # Save confusion matrix to CSV file
-        with open('confusion_matrix.csv', 'a', newline='') as file:
-            writer = csv.writer(file)
-            if epoch == 0:
-                writer.writerow(['Epoch'])
-            else:
-                writer.writerow([])
-            writer.writerow([f'Epoch {epoch + 1}'])
-            writer.writerow([''] + [f'Class {i}' for i in range(len(conf_matrix))])
-            for i in range(len(conf_matrix)):
-                writer.writerow([f'Class {i}'] + list(conf_matrix[i].ravel()))
+        with open('confusion_matrix.csv', 'a', newline='') as csvfile:
+            writer = csv.writer(csvfile)
 
-        return conf_matrix, f1
+            # Write epoch number
+            writer.writerow(['Epoch:' + str(epoch)])
+
+            # Write class names row
+            class_names = ['Class ' + str(i+1) for i in range(conf_matrix.shape[0])]
+            writer.writerow(class_names)
+
+            # Write TP, TN, FP, FN values for each class
+            for i in range(conf_matrix.shape[0]):
+                tp = conf_matrix[i][1][1]
+                tn = conf_matrix[i][0][0]
+                fp = conf_matrix[i][0][1]
+                fn = conf_matrix[i][1][0]
+                writer.writerow([tp, tn] + [fp, fn] * (conf_matrix.shape[0]-1))
+
+            # Write empty line for the next epoch
+            writer.writerow([])
+
 
 
  
