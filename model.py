@@ -150,7 +150,7 @@ class Model():
             running_loss += loss.item()
 
             outputs = outputs
-            predicted = (outputs > 0.7).float()  # Convert probabilities to binary predictions
+            predicted = (outputs > 0.6).float()  # Convert probabilities to binary predictions
             true_labels.extend(labels.cpu().numpy())
             predicted_labels.extend(predicted.cpu().numpy())
 
@@ -208,7 +208,7 @@ class Model():
                 _, outputs = self.model(img)
 
                 outputs = F.sigmoid(outputs)
-                predicted = (outputs > 0.7).float()  # Convert probabilities to binary predictions
+                predicted = (outputs > 0.6).float()  # Convert probabilities to binary predictions
                 true_labels.extend(labels.cpu().numpy())
                 predicted_labels.extend(predicted.cpu().numpy())
 
@@ -237,7 +237,7 @@ class Model():
                 _, outputs = self.model(img)
 
                 outputs = F.sigmoid(outputs)
-                predicted = (outputs > 0.7).float()  # Convert probabilities to binary predictions
+                predicted = (outputs > 0.6).float()  # Convert probabilities to binary predictions
                 true_labels.extend(labels.cpu().numpy())
                 predicted_labels.extend(predicted.cpu().numpy())
 

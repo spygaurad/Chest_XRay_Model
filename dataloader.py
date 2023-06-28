@@ -154,7 +154,7 @@ import csv
 import re
 from collections import Counter
 
-root_dir = '/home/optimus/Downloads/Dataset/ChestXRays/NIH/'
+root_dir = '/home/optimus/Downloads/Dataset/ChestXRays/sample/'
 
 class ChestXRayDataset(Dataset):
     def __init__(self, csv_file, image_dir, num_classes):
@@ -172,20 +172,15 @@ class ChestXRayDataset(Dataset):
         row = self.data[index]
         image_path = os.path.join(self.image_dir, row[0])
         labels = row[1].split('|')
-
-        if len(labels) == 1:
-            label_vector = self._create_label_vector(labels)
-            try:
-                image = Image.open(image_path).convert('RGB')
-                image = self.transform(image)
-            except (OSError, IOError):
-                image = torch.rand(3, 256, 256)
-        else:
-            # Exclude images with multiple labels
+        label_vector = self._create_label_vector(labels)
+        try:
+            image = Image.open(image_path).convert('RGB')
+            image = self.transform(image)
+        except (OSError, IOError):
             image = torch.rand(3, 256, 256)
-            label_vector = torch.zeros(self.num_classes, dtype=torch.float32)
 
         return image, label_vector
+
 
     def _create_class_mapping(self):
         unique_labels = set()
@@ -231,6 +226,8 @@ class ChestXRayDataset(Dataset):
             transforms.RandomRotation(10),
             transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2),
             transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                std=[0.229, 0.224, 0.225])
         ])
         return transform
 
@@ -258,9 +255,9 @@ class ChestXRayDataset(Dataset):
 class ChestXRayDataLoader:
     def __init__(self, batch_size, num_classes=4):
         image_dir = f'{root_dir}/images/'
-        self.train_dataset = ChestXRayDataset(f'Datasets/multilabel_classification/new_train.csv', image_dir, num_classes)
-        self.val_dataset = ChestXRayDataset(f'Datasets/multilabel_classification/new_val.csv', image_dir, num_classes)
-        self.test_dataset = ChestXRayDataset(f'Datasets/multilabel_classification/new_test.csv', image_dir, num_classes)
+        self.train_dataset = ChestXRayDataset(f'Datasets/multilabel_classification/sample_labels_train.csv', image_dir, num_classes)
+        self.val_dataset = ChestXRayDataset(f'Datasets/multilabel_classification/sample_labels_val.csv', image_dir, num_classes)
+        self.test_dataset = ChestXRayDataset(f'Datasets/multilabel_classification/sample_labels_test.csv', image_dir, num_classes)
         self.batch_size = batch_size
 
     def load_data(self):
