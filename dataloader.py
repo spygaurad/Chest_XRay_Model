@@ -101,7 +101,7 @@ class ChestXRayDataset(Dataset):
 
         for instance in self.data:
             labels = instance[1]
-            labels = labels.split(' ')
+            labels = labels.split('|')
             label_vector = self._create_label_vector(labels)
             class_counts += label_vector.numpy()
             total_samples += 1
