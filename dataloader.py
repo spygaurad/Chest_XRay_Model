@@ -45,10 +45,11 @@ class ChestXRayDataset(Dataset):
     def _create_class_mapping(self):
         unique_labels = set()
         for row in self.data:
-            if re.search(" ", row[1]):
-                labels = row[1].split(" ")  # Split the labels separated by ' '
+            if re.search("|", row[1]):
+                labels = row[1].split("|")  # Split the labels separated by ' '
             else:
-                labels = [label.lstrip() for label in row[1].split(" ")]
+                # labels = [label.lstrip() for label in row[1].split(" ")]
+                labels = labels[0]
             unique_labels.update(labels)
         class_mapping = {label: i for i, label in enumerate(sorted(unique_labels))}
         return class_mapping
