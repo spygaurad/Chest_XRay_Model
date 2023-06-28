@@ -10,7 +10,8 @@ import random
 import torch.nn.functional as F
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-
+if DEVICE == "cuda":
+    torch.cuda.empty_cache()
 
 class GradCAM:
     def __init__(self, model, target_layer):

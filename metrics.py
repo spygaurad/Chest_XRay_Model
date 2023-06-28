@@ -109,3 +109,64 @@ class YOLOLoss(nn.Module):
 
         return total_loss
 
+
+class MultiLabelAUROC(nn.Module):
+    def __init__(self):
+        super(MultiLabelAUROC, self).__init__()
+
+    def forward(self, y_gt, y_pred):
+        auroc = []
+        gt_np = y_gt.cpu().numpy()
+        pred_np = y_pred.cpu().numpy()
+        assert gt_np.shape == pred_np.shape, "y_gt and y_pred should have the same size"
+        for i in range(gt_np.shape[1]):
+            try:
+                auroc.append(roc_auc_score(gt_np[:, i], pred_np[:, i]))
+            except ValueError:
+                pass
+        return torch.tensor(auroc)
+
+
+class MultiLabelAccuracy(nn.Module):
+    def __init__(self):
+        super(MultiLabelAccuracy, self).__init__()
+
+    def forward(self, y_gt, y_pred):
+        acc = []
+        gt_np = y_gt.cpu().numpy()
+        pred_np = y_pred.cpu().numpy()
+        assert gt_np.shape == pred_np.shape, "y_gt and y_pred should have the same size"
+        for i in range(gt_np.shape[1]):
+            acc.append(accuracy_score(gt_np[:, i], np.where(pred_np[:, i] >= 0.5, 1, 0)))
+        return torch.tensor(acc)
+
+
+class MultiLabelF1(nn.Module):
+    def __init__(self):
+        super(MultiLabelF1, self).__init__()
+
+    def forward(self, y_gt, y_pred):
+        f1_out = []
+        gt_np = y_gt.cpu().numpy()
+        pred_np = y_pred.cpu().numpy()
+        assert gt_np.shape == pred_np.shape, "y_gt and y_pred should have the same size"
+        for i in range(gt_np.shape[1]):
+            f1_out.append(f1_score(gt_np[:, i], np.where(pred_np[:, i] >= 0.5, 1, 0)))
+        return torch.tensor(f1_out)
+
+
+class MultiLabelPrecisionRecall(nn.Module):
+    def __init__(self):
+        super(MultiLabelPrecisionRecall, self).__init__()
+
+    def forward(self, y_gt, y_pred):
+        precision_out = []
+        recall_out = []
+        gt_np = y_gt.cpu().numpy()
+        pred_np = y_pred.cpu().numpy()
+        assert gt_np.shape == pred_np.shape, "y_gt and y_pred should have the same size"
+        for i in range(gt_np.shape[1]):
+            p = precision_recall_fscore_support(gt_np[:, i], np.where(pred_np[:, i] >= 0.5, 1, 0), average='binary')
+            precision_out.append(p[0])
+            recall_out.append(p[1])
+        return torch.tensor(precision_out), torch.tensor(recall_out)

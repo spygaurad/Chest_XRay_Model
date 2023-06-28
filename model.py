@@ -1,6 +1,6 @@
 from network import EfficientNet
 from dataloader import ChestXRayDataLoader
-from metrics import DiceLoss, MixedLoss
+from metrics import DiceLoss, MixedLoss, MultiLabelAccuracy, MultiLabelAUROC, MultiLabelF1, MultiLabelPrecisionRecall
 
 import torch
 import torch.nn as nn
@@ -16,13 +16,16 @@ from sklearn.metrics import multilabel_confusion_matrix, f1_score
 from tensorboardX import SummaryWriter
 
 
-# from omnixai.data.image import Image as IM
-# from omnixai.explainers.vision.specific.gradcam.pytorch.gradcam import GradCAM
-
-DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+#Model training parameters
 # DEVICE = "cpu"
-BATCH_SIZE = 64
-MODEL_NAME = "EfficientNet_1_2"
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+if DEVICE == "cuda":
+    torch.cuda.empty_cache()
+BATCH_SIZE = 16
+MODEL_NAME = "EfficientNet_3_2"
+LEARNING_RATE = 1e-3
+LEARNING_RATE_SCHEDULE_FACTOR = 0.1
+LEARNING_RATE_SCHEDULE_PATIENCE = 5
 large_file_dir = '/mnt/media/wiseyak/Chest_XRay_Model/'
 
 
@@ -31,23 +34,23 @@ class Model():
     def __init__(self, trained=False):
         self.model = EfficientNet().to(DEVICE)
         if trained: self.model.load_state_dict(torch.load(f'{large_file_dir}/saved_model/EfficientNet_1_55.pth'))
-        self.classes =  {
-                'Atelectasis': 0, 
-                'Cardiomegaly': 1, 
-                'Consolidation': 2, 
-                'Edema': 3, 
-                'Effusion': 4, 
-                'Emphysema': 5, 
-                'Fibrosis': 6, 
-                'Hernia': 7, 
-                'Infiltration': 8, 
-                'Mass': 9, 
-                'No Finding': 10, 
-                'Nodule': 11, 
-                'Pleural_Thickening': 12, 
-                'Pneumonia': 13, 
-                'Pneumothorax': 14
-            }       
+        # self.classes =  {
+        #         'Atelectasis': 0, 
+        #         'Cardiomegaly': 1, 
+        #         'Consolidation': 2, 
+        #         'Edema': 3, 
+        #         'Effusion': 4, 
+        #         'Emphysema': 5, 
+        #         'Fibrosis': 6, 
+        #         'Hernia': 7, 
+        #         'Infiltration': 8, 
+        #         'Mass': 9, 
+        #         'No Finding': 10, 
+        #         'Nodule': 11, 
+        #         'Pleural_Thickening': 12, 
+        #         'Pneumonia': 13, 
+        #         'Pneumothorax': 14
+        #     }       
 
 
     # def psnr(self, reconstructed, original, max_val=1.0): return 20 * torch.log10(max_val / torch.sqrt(F.mse_loss(reconstructed, original)))        
@@ -67,12 +70,18 @@ class Model():
         print("Loading Datasets...")
         data_loader = ChestXRayDataLoader(batch_size=BATCH_SIZE)
         train_data, val_data, test_data, class_weights = data_loader.load_data()
+        # train_data, class_weights = data_loader.load_data()
         weight_tensor = class_weights.to(DEVICE)
 
         print("Dataset Loaded.")
         binaryCrossEntropyLoss = nn.BCELoss(weight=weight_tensor)
         # bceLoss = nn.BCELoss()
         # mseloss = nn.MSELoss()
+
+        #initialize other metircs
+        # multilabelacc = MultiLabelAccuracy()
+        # multilabelauc = MultiLabelAUROC()
+        # multilabelprec_rec = MultiLabelPrecisionRecall()
 
 
         print(f"Beginning to train...")
@@ -88,7 +97,7 @@ class Model():
         for epoch in range(1, epochs+1):
 
             print(f"Epoch No: {epoch}")
-            train_loss, train_f1 = self.train(dataset=train_data, loss_func=binaryCrossEntropyLoss, optimizer=optimizer)
+            train_loss, train_f1 = self.train(dataset=train_data, loss_func=binaryCrossEntropyLoss, optimizer=optimizer, epoch=epoch)
             val_f1 = self.validate(dataset=val_data)
             train_loss_epochs.append(train_loss)
             val_f1_epochs.append(val_f1)
@@ -97,20 +106,20 @@ class Model():
                 test_confmtx, test_f1 = self.test(dataset=test_data, epoch=epoch)
                 test_f1_epochs.append(test_f1)
                 print(f"Test F1: {test_f1}")
-                print("Saving model")
-                torch.save(self.model.state_dict(), f"{large_file_dir}saved_model/{MODEL_NAME}_{epoch}.pth")
-                print("Model Saved")
-                writer.add_scalar("F1/Test", test_f1, epoch)
+            print("Saving model")
+            torch.save(self.model.state_dict(), f"{large_file_dir}saved_model/{MODEL_NAME}.pth")
+            print("Model Saved")
 
             print(f"Train Loss:{train_loss}, Train F1:{train_f1}, Validation F1:{val_f1}")
+            print(f"Train Loss:{train_loss}, Train F1:{train_f1}")
+            print(f"Train Loss:{train_loss}, Train")
 
-            if max(val_f1_epochs) == val_f1:
-                torch.save({
-                'epoch': epoch,
-                'model_state_dict': self.model.state_dict(),
-                'optimizer_state_dict': optimizer.state_dict(),
-                'train_loss': train_loss,
-                }, f"checkpoints/{MODEL_NAME}_{epoch}.tar")
+            torch.save({
+            'epoch': epoch,
+            'model_state_dict': self.model.state_dict(),
+            'optimizer_state_dict': optimizer.state_dict(),
+            'train_loss': train_loss,
+            }, f"checkpoints/{MODEL_NAME}_{epoch}.tar")
 
             writer.add_scalar("Loss/train", train_loss, epoch)
             writer.add_scalar("F1/train", train_f1, epoch)
@@ -126,7 +135,7 @@ class Model():
 
 
 
-    def train(self, dataset, loss_func, optimizer):
+    def train(self, dataset, loss_func, optimizer, epoch):
         self.model.train()
         running_loss = 0.0
         running_total = 0
@@ -140,7 +149,7 @@ class Model():
             loss = loss_func(outputs, labels)
             running_loss += loss.item()
 
-            outputs = F.sigmoid(outputs)
+            outputs = outputs
             predicted = (outputs > 0.7).float()  # Convert probabilities to binary predictions
             true_labels.extend(labels.cpu().numpy())
             predicted_labels.extend(predicted.cpu().numpy())
@@ -156,6 +165,31 @@ class Model():
         true_labels_binary = np.array(true_labels)
         predicted_labels_binary = np.array(predicted_labels)
         f1 = f1_score(true_labels_binary, predicted_labels_binary, average='macro', zero_division=0)
+
+        # Calculate confusion matrix
+        conf_matrix = multilabel_confusion_matrix(true_labels_binary, predicted_labels_binary)
+
+        # Save confusion matrix to CSV file
+        with open(f'{MODEL_NAME}_confusion_matrix_train.csv', 'a', newline='') as csvfile:
+            writer = csv.writer(csvfile)
+
+            # Write epoch number
+            writer.writerow(['Epoch:' + str(epoch)])
+
+            # Write confusion matrix
+            writer.writerow(['True/Predicted'] + [f'Class {i+1}' for i in range(conf_matrix.shape[0])])
+            writer.writerow([''] + ['TP', 'FP', 'FN', 'TN'])
+
+            for i in range(conf_matrix.shape[0]):
+                class_name = f'Class {i+1}'
+                tp = conf_matrix[i][1][1]
+                fp = conf_matrix[i][0][1]
+                fn = conf_matrix[i][1][0]
+                tn = conf_matrix[i][0][0]
+                writer.writerow([class_name, tp, fp, fn, tn])
+
+            # Write empty line for the next epoch
+            writer.writerow([])
 
         return epoch_loss, f1
       
@@ -219,7 +253,7 @@ class Model():
         f1 = f1_score(true_labels_binary, predicted_labels_binary, average='macro', zero_division=0)
 
         # Save confusion matrix to CSV file
-        with open('confusion_matrix.csv', 'a', newline='') as csvfile:
+        with open(f'{MODEL_NAME}_confusion_matrix_test.csv', 'a', newline='') as csvfile:
             writer = csv.writer(csvfile)
 
             # Write epoch number
