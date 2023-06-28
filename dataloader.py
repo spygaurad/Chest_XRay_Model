@@ -166,7 +166,7 @@ class ChestXRayDataset(Dataset):
         self.weight_tensor = self._calculate_class_weights()
 
     def __len__(self):
-        return len(self.data[:])
+        return len(self.data[:320])
 
     def __getitem__(self, index):
         row = self.data[index]
@@ -247,7 +247,7 @@ class ChestXRayDataset(Dataset):
 
 
 class ChestXRayDataLoader:
-    def __init__(self, batch_size, num_classes=4):
+    def __init__(self, batch_size, num_classes=15):
         image_dir = f'{root_dir}/images/'
         self.train_dataset = ChestXRayDataset(f'Datasets/multilabel_classification/sample_labels_train.csv', image_dir, num_classes)
         self.val_dataset = ChestXRayDataset(f'Datasets/multilabel_classification/sample_labels_val.csv', image_dir, num_classes)
