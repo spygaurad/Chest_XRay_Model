@@ -130,5 +130,5 @@ class ChestXRayDataLoader:
         # Calculate class weights only for the training dataset
         class_weights = self.train_dataset.weight_tensor
 
-        return train_loader, class_weights
-        # return train_loader, val_loader, test_loader, class_weights
+        # return train_loader, class_weights
+        return train_loader, val_loader, test_loader, class_weights
