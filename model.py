@@ -111,8 +111,8 @@ class Model():
             print("Model Saved")
 
             print(f"Train Loss:{train_loss}, Train F1:{train_f1}, Validation F1:{val_f1}")
-            print(f"Train Loss:{train_loss}, Train F1:{train_f1}")
-            print(f"Train Loss:{train_loss}, Train")
+            # print(f"Train Loss:{train_loss}, Train F1:{train_f1}")
+            # print(f"Train Loss:{train_loss}, Train")
 
             torch.save({
             'epoch': epoch,
