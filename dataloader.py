@@ -166,7 +166,7 @@ class ChestXRayDataset(Dataset):
         self.weight_tensor = self._calculate_class_weights()
 
     def __len__(self):
-        return len(self.data[:320])
+        return len(self.data[:])
 
     def __getitem__(self, index):
         row = self.data[index]
@@ -193,7 +193,13 @@ class ChestXRayDataset(Dataset):
 
         class_counts = self._get_class_counts(unique_labels)
 
-        class_mapping = {label: i for i, label in enumerate(class_counts)}
+        # Sort the class labels based on the count in descending order
+        sorted_labels = sorted(class_counts.keys())
+
+        # Select top 4 class labels
+        selected_labels = sorted_labels[:]
+
+        class_mapping = {label: i for i, label in enumerate(selected_labels)}
         return class_mapping
 
     def _create_label_vector(self, labels):
@@ -247,7 +253,7 @@ class ChestXRayDataset(Dataset):
 
 
 class ChestXRayDataLoader:
-    def __init__(self, batch_size, num_classes=15):
+    def __init__(self, batch_size, num_classes=4):
         image_dir = f'{root_dir}/images/'
         self.train_dataset = ChestXRayDataset(f'Datasets/multilabel_classification/sample_labels_train.csv', image_dir, num_classes)
         self.val_dataset = ChestXRayDataset(f'Datasets/multilabel_classification/sample_labels_val.csv', image_dir, num_classes)
