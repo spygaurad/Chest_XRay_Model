@@ -191,10 +191,10 @@ class ChestXRayDataset(Dataset):
                 labels = [label.lstrip() for label in row[1].split("|")]
             unique_labels.update(labels)
 
-        class_counts = self._get_class_counts(unique_labels)
+        # class_counts = self._get_class_counts(unique_labels)
 
         # Sort the class labels based on the count in descending order
-        sorted_labels = sorted(class_counts.keys())
+        sorted_labels = sorted(unique_labels)
 
         # Select top 4 class labels
         selected_labels = sorted_labels[:]
@@ -247,9 +247,9 @@ class ChestXRayDataset(Dataset):
 
         return weight_tensor
 
-    def _get_class_counts(self, labels):
-        class_counts = Counter(labels)
-        return class_counts
+    # def _get_class_counts(self, labels):
+    #     class_counts = Counter(labels)
+    #     return class_counts
 
 
 class ChestXRayDataLoader:
