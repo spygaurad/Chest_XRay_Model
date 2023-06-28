@@ -114,7 +114,7 @@ class ChestXRayDataset(Dataset):
 
 
 class ChestXRayDataLoader:
-    def __init__(self, batch_size, num_classes=10):
+    def __init__(self, batch_size, num_classes=14):
         image_dir = f'{root_dir}/images/'
         self.train_dataset = ChestXRayDataset(f'Datasets/multilabel_classification/new_train.csv', image_dir, num_classes)
         self.val_dataset = ChestXRayDataset(f'Datasets/multilabel_classification/new_val.csv', image_dir, num_classes)
