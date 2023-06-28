@@ -21,7 +21,7 @@ from tensorboardX import SummaryWriter
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 if DEVICE == "cuda":
     torch.cuda.empty_cache()
-BATCH_SIZE = 2
+BATCH_SIZE = 64
 MODEL_NAME = "EfficientNet_1_NIH_SMALLDATASET"
 LEARNING_RATE = 1e-3
 LEARNING_RATE_SCHEDULE_FACTOR = 0.1
