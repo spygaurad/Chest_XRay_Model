@@ -116,15 +116,15 @@ class ChestXRayDataset(Dataset):
 class ChestXRayDataLoader:
     def __init__(self, batch_size, num_classes=10):
         image_dir = f'{root_dir}/images/'
-        self.train_dataset = ChestXRayDataset(f'Datasets/multilabel_modified/out.csv', image_dir, num_classes)
-        # self.val_dataset = ChestXRayDataset(f'Datasets/multilabel_classification/val.csv', image_dir, num_classes)
-        # self.test_dataset = ChestXRayDataset(f'Datasets/multilabel_classification/test.csv', image_dir, num_classes)
+        self.train_dataset = ChestXRayDataset(f'Datasets/multilabel_modified/new_train.csv', image_dir, num_classes)
+        self.val_dataset = ChestXRayDataset(f'Datasets/multilabel_classification/new_val.csv', image_dir, num_classes)
+        self.test_dataset = ChestXRayDataset(f'Datasets/multilabel_classification/new_test.csv', image_dir, num_classes)
         self.batch_size = batch_size
 
     def load_data(self):
         train_loader = DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True)
-        # val_loader = DataLoader(self.val_dataset, batch_size=self.batch_size, shuffle=False)
-        # test_loader = DataLoader(self.test_dataset, batch_size=self.batch_size, shuffle=False)
+        val_loader = DataLoader(self.val_dataset, batch_size=self.batch_size, shuffle=False)
+        test_loader = DataLoader(self.test_dataset, batch_size=self.batch_size, shuffle=False)
 
         # Calculate class weights only for the training dataset
         class_weights = self.train_dataset.weight_tensor
