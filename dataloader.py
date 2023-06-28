@@ -193,13 +193,7 @@ class ChestXRayDataset(Dataset):
 
         class_counts = self._get_class_counts(unique_labels)
 
-        # Sort the class labels based on the count in descending order
-        sorted_labels = sorted(class_counts.keys(), key=lambda x: class_counts[x], reverse=True)
-
-        # Select top 4 class labels
-        selected_labels = sorted_labels[:4]
-
-        class_mapping = {label: i for i, label in enumerate(selected_labels)}
+        class_mapping = {label: i for i, label in enumerate(class_counts)}
         return class_mapping
 
     def _create_label_vector(self, labels):
