@@ -1,0 +1,235 @@
+Epoch:5
+True/Predicted,Class 1,Class 2,Class 3,Class 4,Class 5,Class 6,Class 7,Class 8,Class 9,Class 10
+,TP,FP,FN,TN
+Class 1,147,8,12,627
+Class 2,49,8,10,727
+Class 3,138,18,3,635
+Class 4,11,0,3,780
+Class 5,17,4,2,771
+Class 6,4,0,1,789
+Class 7,85,7,30,672
+Class 8,12,0,2,780
+Class 9,31,0,36,727
+Class 10,84,15,4,691
+
+Epoch:10
+True/Predicted,Class 1,Class 2,Class 3,Class 4,Class 5,Class 6,Class 7,Class 8,Class 9,Class 10
+,TP,FP,FN,TN
+Class 1,153,7,6,628
+Class 2,52,4,7,731
+Class 3,138,14,3,639
+Class 4,9,0,5,780
+Class 5,17,5,2,770
+Class 6,4,0,1,789
+Class 7,105,15,10,664
+Class 8,14,1,0,779
+Class 9,66,6,1,721
+Class 10,83,8,5,698
+
+Epoch:15
+True/Predicted,Class 1,Class 2,Class 3,Class 4,Class 5,Class 6,Class 7,Class 8,Class 9,Class 10
+,TP,FP,FN,TN
+Class 1,153,5,6,630
+Class 2,50,3,9,732
+Class 3,135,5,6,648
+Class 4,11,7,3,773
+Class 5,17,1,2,774
+Class 6,4,0,1,789
+Class 7,94,7,21,672
+Class 8,14,3,0,777
+Class 9,66,8,1,719
+Class 10,85,8,3,698
+
+Epoch:20
+True/Predicted,Class 1,Class 2,Class 3,Class 4,Class 5,Class 6,Class 7,Class 8,Class 9,Class 10
+,TP,FP,FN,TN
+Class 1,156,5,3,630
+Class 2,52,8,7,727
+Class 3,132,3,9,650
+Class 4,11,1,3,779
+Class 5,18,3,1,772
+Class 6,4,2,1,787
+Class 7,111,13,4,666
+Class 8,14,1,0,779
+Class 9,66,3,1,724
+Class 10,81,7,7,699
+
+Epoch:25
+True/Predicted,Class 1,Class 2,Class 3,Class 4,Class 5,Class 6,Class 7,Class 8,Class 9,Class 10
+,TP,FP,FN,TN
+Class 1,154,10,5,625
+Class 2,52,6,7,729
+Class 3,135,14,6,639
+Class 4,11,0,3,780
+Class 5,17,2,2,773
+Class 6,4,2,1,787
+Class 7,98,9,17,670
+Class 8,14,0,0,780
+Class 9,65,3,2,724
+Class 10,80,11,8,695
+
+Epoch:30
+True/Predicted,Class 1,Class 2,Class 3,Class 4,Class 5,Class 6,Class 7,Class 8,Class 9,Class 10
+,TP,FP,FN,TN
+Class 1,153,7,6,628
+Class 2,56,9,3,726
+Class 3,136,5,5,648
+Class 4,11,2,3,778
+Class 5,16,1,3,774
+Class 6,4,0,1,789
+Class 7,99,6,16,673
+Class 8,14,2,0,778
+Class 9,65,1,2,726
+Class 10,81,2,7,704
+
+Epoch:35
+True/Predicted,Class 1,Class 2,Class 3,Class 4,Class 5,Class 6,Class 7,Class 8,Class 9,Class 10
+,TP,FP,FN,TN
+Class 1,153,5,6,630
+Class 2,56,9,3,726
+Class 3,129,5,12,648
+Class 4,11,6,3,774
+Class 5,18,2,1,773
+Class 6,4,1,1,788
+Class 7,107,21,8,658
+Class 8,14,0,0,780
+Class 9,63,2,4,725
+Class 10,80,3,8,703
+
+Epoch:40
+True/Predicted,Class 1,Class 2,Class 3,Class 4,Class 5,Class 6,Class 7,Class 8,Class 9,Class 10
+,TP,FP,FN,TN
+Class 1,154,3,5,632
+Class 2,45,2,14,733
+Class 3,137,27,4,626
+Class 4,11,1,3,779
+Class 5,17,1,2,774
+Class 6,4,1,1,788
+Class 7,84,2,31,677
+Class 8,14,2,0,778
+Class 9,67,3,0,724
+Class 10,85,5,3,701
+
+Epoch:45
+True/Predicted,Class 1,Class 2,Class 3,Class 4,Class 5,Class 6,Class 7,Class 8,Class 9,Class 10
+,TP,FP,FN,TN
+Class 1,148,8,11,627
+Class 2,43,2,16,733
+Class 3,128,2,13,651
+Class 4,11,3,3,777
+Class 5,17,6,2,769
+Class 6,4,2,1,787
+Class 7,108,5,7,674
+Class 8,14,0,0,780
+Class 9,63,1,4,726
+Class 10,85,11,3,695
+
+Epoch:50
+True/Predicted,Class 1,Class 2,Class 3,Class 4,Class 5,Class 6,Class 7,Class 8,Class 9,Class 10
+,TP,FP,FN,TN
+Class 1,156,11,3,624
+Class 2,53,4,6,731
+Class 3,133,9,8,644
+Class 4,11,0,3,780
+Class 5,18,2,1,773
+Class 6,4,1,1,788
+Class 7,100,6,15,673
+Class 8,14,0,0,780
+Class 9,65,1,2,726
+Class 10,82,7,6,699
+
+Epoch:55
+True/Predicted,Class 1,Class 2,Class 3,Class 4,Class 5,Class 6,Class 7,Class 8,Class 9,Class 10
+,TP,FP,FN,TN
+Class 1,155,2,4,633
+Class 2,54,11,5,724
+Class 3,135,8,6,645
+Class 4,11,1,3,779
+Class 5,17,2,2,773
+Class 6,4,0,1,789
+Class 7,103,5,12,674
+Class 8,14,3,0,777
+Class 9,66,4,1,723
+Class 10,84,8,4,698
+
+Epoch:60
+True/Predicted,Class 1,Class 2,Class 3,Class 4,Class 5,Class 6,Class 7,Class 8,Class 9,Class 10
+         TP,FP,FN,TN
+Class 1: 153,5,6,630
+Class 2: 51,7,8,728
+Class 3: 136,7,5,646
+Class 4: 10,1,4,779
+Class 5: 16,1,3,774
+Class 6: 4,0,1,789
+Class 7: 109,18,6,661
+Class 8: 14,2,0,778
+Class 9: 65,4,2,723
+Class 1: ,83,6,5,700
+
+
+
+
+
+
+
+
+
+Class 1:
+TPR: 0.7779291553133515
+FPR: 0.010965256607535755
+TNR: 0.9890347433924643
+FNR: 0.22207084468664844
+
+Class 2:
+TPR: 0.6873686778764147
+FPR: 0.006748179544061302
+TNR: 0.9932518204559387
+FNR: 0.31263132212358534
+
+Class 3:
+TPR: 0.8211781206171108
+FPR: 0.0091371818522673
+TNR: 0.9908628181477327
+FNR: 0.17882187938288915
+
+Class 4:
+TPR: 0.6305970149253731
+FPR: 0.007596898954703832
+TNR: 0.9924031010452962
+FNR: 0.3694029850746269
+
+Class 5:
+TPR: 0.6862745098039216
+FPR: 0.001157139828424869
+TNR: 0.9988428601715751
+FNR: 0.3137254901960784
+
+Class 6:
+TPR: 0.7659574468085106
+FPR: 0.00025575695966599977
+TNR: 0.999744243040334
+FNR: 0.23404255319148937
+
+Class 7:
+TPR: 0.7002400239940079
+FPR: 0.01172274143302181
+TNR: 0.9882772585669782
+FNR: 0.2997599760059921
+
+Class 8:
+TPR: 0.671875
+FPR: 0.0010275779384807984
+TNR: 0.9989724220615192
+FNR: 0.328125
+
+Class 9:
+TPR: 0.8092485549132948
+FPR: 0.0031284955802553943
+TNR: 0.9968715044197446
+FNR: 0.1907514450867052
+
+Class 10:
+TPR: 0.681217877094972
+FPR: 0.007818133467183801
+TNR: 0.9921818665328162
+FNR: 0.31878212290502794

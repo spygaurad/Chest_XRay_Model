@@ -21,12 +21,13 @@ from tensorboardX import SummaryWriter
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 if DEVICE == "cuda":
     torch.cuda.empty_cache()
-BATCH_SIZE = 64
-MODEL_NAME = "EfficientNet_1_NIH_SMALLDATASET"
+BATCH_SIZE = 8
+MODEL_NAME = "EfficientNet_1_SampleDataset"
 LEARNING_RATE = 1e-3
 LEARNING_RATE_SCHEDULE_FACTOR = 0.1
 LEARNING_RATE_SCHEDULE_PATIENCE = 5
-large_file_dir = '/mnt/media/wiseyak/Chest_XRay_Model/'
+# large_file_dir = '/mnt/media/wiseyak/Chest_XRay_Model/'
+large_file_dir = 'Datasets/'
 
 
 class Model():
@@ -293,7 +294,7 @@ class Model():
 
 
 model = Model(trained=False)
-model.fit(250, 1e-3)
+model.fit(60, 1e-3)
 # data_loader = ChestXRayDataLoader(batch_size=BATCH_SIZE)
 # train_data, val_data, test_data, class_weights = data_loader.load_data()
 # model.test(dataset=test_data, epoch=0)
