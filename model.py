@@ -263,7 +263,7 @@ class Model():
 
         print("Dataset Loaded.")
         binaryCrossEntropyLoss = nn.BCELoss(weight=weight_tensor)
-        
+
 
         print(f"Beginning to train...")
 
@@ -299,10 +299,10 @@ class Model():
 
             '''------Testing------'''
             if epoch%5==0:
-                test_confmtx, test_f1, train_tpr, train_fpr, train_tnr, train_fnr = self.test(dataset=test_data, epoch=epoch)
+                test_confmtx, test_f1, test_tpr, test_fpr, test_tnr, test_fnr = self.test(dataset=test_data, epoch=epoch)
                 test_f1_epochs.append(test_f1)
                 print(f"Test F1: {test_f1}")
-                writer.add_scalar("F1/test", val_f1, epoch)
+                writer.add_scalar("F1/test", test_f1, epoch)
                 writer.add_scalar("TPR/test", test_tpr, epoch)
                 writer.add_scalar("FPR/test", test_fpr, epoch)
                 writer.add_scalar("TNR/test", test_tnr, epoch)
