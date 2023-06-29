@@ -21,8 +21,8 @@ from tensorboardX import SummaryWriter
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 if DEVICE == "cuda":
     torch.cuda.empty_cache()
-BATCH_SIZE = 8
-MODEL_NAME = "EfficientNet_1_SampleDataset"
+BATCH_SIZE = 64
+MODEL_NAME = "EfficientNet_1_NIH_Small_Sample_GreyScale"
 LEARNING_RATE = 1e-3
 LEARNING_RATE_SCHEDULE_FACTOR = 0.1
 LEARNING_RATE_SCHEDULE_PATIENCE = 5
@@ -55,84 +55,6 @@ class Model():
 
 
     # def psnr(self, reconstructed, original, max_val=1.0): return 20 * torch.log10(max_val / torch.sqrt(F.mse_loss(reconstructed, original)))        
-
-    def fit(self, epochs, lr):
-        print(f"Using {DEVICE} device...")
-
-        print("Initializing Parameters...")
-        self.model = self.model.to(DEVICE)
-        # model.load_state_dict(torch.load('/mnt/media/wiseyak/Chest_XRays/saved_model/EfficientNet_1_25.pth', map_location=DEVICE))
-        total_params = sum(p.numel() for p in self.model.parameters())
-        print("Total parameters of the model is: {:.2f}{}".format(total_params / 10**(3 * min(len(str(total_params)) // 3, len(["", "K", "M", "B", "T"]) - 1)), ["", "K", "M", "B", "T"][min(len(str(total_params)) // 3, len(["", "K", "M", "B", "T"]) - 1)]))
-
-        print(f"Initializing the Optimizer")
-        optimizer = optim.AdamW(self.model.parameters(), lr)
-
-        print("Loading Datasets...")
-        data_loader = ChestXRayDataLoader(batch_size=BATCH_SIZE)
-        train_data, val_data, test_data, class_weights = data_loader.load_data()
-        # train_data, class_weights = data_loader.load_data()
-        weight_tensor = class_weights.to(DEVICE)
-
-        print("Dataset Loaded.")
-        binaryCrossEntropyLoss = nn.BCELoss(weight=weight_tensor)
-        # bceLoss = nn.BCELoss()
-        # mseloss = nn.MSELoss()
-
-        #initialize other metircs
-        # multilabelacc = MultiLabelAccuracy()
-        # multilabelauc = MultiLabelAUROC()
-        # multilabelprec_rec = MultiLabelPrecisionRecall()
-
-
-        print(f"Beginning to train...")
-
-
-        # mseloss = nn.MSELoss()
-        train_loss_epochs, val_f1_epochs, test_f1_epochs = [], [], []
-        writer = SummaryWriter(f'runs/{MODEL_NAME}/')
-        os.makedirs("checkpoints/", exist_ok=True)
-        os.makedirs(f"{large_file_dir}saved_model/", exist_ok=True)
-
-
-        for epoch in range(1, epochs+1):
-
-            print(f"Epoch No: {epoch}")
-            train_loss, train_f1 = self.train(dataset=train_data, loss_func=binaryCrossEntropyLoss, optimizer=optimizer, epoch=epoch)
-            val_f1 = self.validate(dataset=val_data)
-            train_loss_epochs.append(train_loss)
-            val_f1_epochs.append(val_f1)
-
-            if epoch%5==0:
-                test_confmtx, test_f1 = self.test(dataset=test_data, epoch=epoch)
-                test_f1_epochs.append(test_f1)
-                print(f"Test F1: {test_f1}")
-            print("Saving model")
-            torch.save(self.model.state_dict(), f"{large_file_dir}saved_model/{MODEL_NAME}.pth")
-            print("Model Saved")
-
-            print(f"Train Loss:{train_loss}, Train F1:{train_f1}, Validation F1:{val_f1}")
-            # print(f"Train Loss:{train_loss}, Train F1:{train_f1}")
-            # print(f"Train Loss:{train_loss}, Train")
-
-            torch.save({
-            'epoch': epoch,
-            'model_state_dict': self.model.state_dict(),
-            'optimizer_state_dict': optimizer.state_dict(),
-            'train_loss': train_loss,
-            }, f"checkpoints/{MODEL_NAME}_{epoch}.tar")
-
-            writer.add_scalar("Loss/train", train_loss, epoch)
-            writer.add_scalar("F1/train", train_f1, epoch)
-            writer.add_scalar("F1/val", val_f1, epoch)
-            
-    
-            print("Epoch Completed. Proceeding to next epoch...")
-
-        print(f"Training Completed for {epochs} epochs.")
-
-
-
 
 
 
@@ -181,6 +103,11 @@ class Model():
             writer.writerow(['True/Predicted'] + [f'Class {i+1}' for i in range(conf_matrix.shape[0])])
             writer.writerow([''] + ['TP', 'FP', 'FN', 'TN'])
 
+            tpr_list = []
+            fpr_list = []
+            tnr_list = []
+            fnr_list = []
+
             for i in range(conf_matrix.shape[0]):
                 class_name = f'Class {i+1}'
                 tp = conf_matrix[i][1][1]
@@ -189,10 +116,25 @@ class Model():
                 tn = conf_matrix[i][0][0]
                 writer.writerow([class_name, tp, fp, fn, tn])
 
+                tpr = tp / (tp + fn)
+                fpr = fp / (fp + tn)
+                tnr = tn / (tn + fp)
+                fnr = fn / (fn + tp)
+
+                tpr_list.append(tpr)
+                fpr_list.append(fpr)
+                tnr_list.append(tnr)
+                fnr_list.append(fnr)
+
+            # Write TPR, FPR, TNR, FNR
+            writer.writerow([])
+            writer.writerow(['', 'TPR', 'FPR', 'TNR', 'FNR'])
+            writer.writerow(['Average'] + [np.mean(tpr_list), np.mean(fpr_list), np.mean(tnr_list), np.mean(fnr_list)])
+
             # Write empty line for the next epoch
             writer.writerow([])
 
-        return epoch_loss, f1
+        return epoch_loss, f1, np.mean(tpr_list), np.mean(fpr_list), np.mean(tnr_list), np.mean(fnr_list)
       
 
 
@@ -264,6 +206,11 @@ class Model():
             writer.writerow(['True/Predicted'] + [f'Class {i+1}' for i in range(conf_matrix.shape[0])])
             writer.writerow([''] + ['TP', 'FP', 'FN', 'TN'])
 
+            tpr_list = []
+            fpr_list = []
+            tnr_list = []
+            fnr_list = []
+
             for i in range(conf_matrix.shape[0]):
                 class_name = f'Class {i+1}'
                 tp = conf_matrix[i][1][1]
@@ -272,10 +219,114 @@ class Model():
                 tn = conf_matrix[i][0][0]
                 writer.writerow([class_name, tp, fp, fn, tn])
 
+                tpr = tp / (tp + fn)
+                fpr = fp / (fp + tn)
+                tnr = tn / (tn + fp)
+                fnr = fn / (fn + tp)
+
+                tpr_list.append(tpr)
+                fpr_list.append(fpr)
+                tnr_list.append(tnr)
+                fnr_list.append(fnr)
+
+            # Write TPR, FPR, TNR, FNR
+            writer.writerow([])
+            writer.writerow(['', 'TPR', 'FPR', 'TNR', 'FNR'])
+            writer.writerow(['Average'] + [np.mean(tpr_list), np.mean(fpr_list), np.mean(tnr_list), np.mean(fnr_list)])
+
             # Write empty line for the next epoch
             writer.writerow([])
 
-        return conf_matrix, f1
+        return conf_matrix, f1, np.mean(tpr_list), np.mean(fpr_list), np.mean(tnr_list), np.mean(fnr_list)
+
+
+
+
+
+    def fit(self, epochs, lr):
+        print(f"Using {DEVICE} device...")
+
+        print("Initializing Parameters...")
+        self.model = self.model.to(DEVICE)
+        # model.load_state_dict(torch.load('/mnt/media/wiseyak/Chest_XRays/saved_model/EfficientNet_1_25.pth', map_location=DEVICE))
+        total_params = sum(p.numel() for p in self.model.parameters())
+        print("Total parameters of the model is: {:.2f}{}".format(total_params / 10**(3 * min(len(str(total_params)) // 3, len(["", "K", "M", "B", "T"]) - 1)), ["", "K", "M", "B", "T"][min(len(str(total_params)) // 3, len(["", "K", "M", "B", "T"]) - 1)]))
+
+        print(f"Initializing the Optimizer")
+        optimizer = optim.AdamW(self.model.parameters(), lr)
+
+        print("Loading Datasets...")
+        data_loader = ChestXRayDataLoader(batch_size=BATCH_SIZE)
+        train_data, val_data, test_data, class_weights = data_loader.load_data()
+        # train_data, class_weights = data_loader.load_data()
+        weight_tensor = class_weights.to(DEVICE)
+
+        print("Dataset Loaded.")
+        binaryCrossEntropyLoss = nn.BCELoss(weight=weight_tensor)
+        
+
+        print(f"Beginning to train...")
+
+
+        # mseloss = nn.MSELoss()
+        train_loss_epochs, val_f1_epochs, test_f1_epochs = [], [], []
+        writer = SummaryWriter(f'runs/{MODEL_NAME}/')
+        os.makedirs("checkpoints/", exist_ok=True)
+        os.makedirs(f"{large_file_dir}saved_model/", exist_ok=True)
+
+
+        for epoch in range(1, epochs+1):
+
+            print(f"Epoch No: {epoch}")
+
+            '''------Training------'''
+            train_loss, train_f1, train_tpr, train_fpr, train_tnr, train_fnr  = self.train(dataset=train_data, loss_func=binaryCrossEntropyLoss, optimizer=optimizer, epoch=epoch)
+            writer.add_scalar("Loss/train", train_loss, epoch)
+            writer.add_scalar("F1/train", train_f1, epoch)
+            writer.add_scalar("TPR/train", train_tpr, epoch)
+            writer.add_scalar("FPR/train", train_fpr, epoch)
+            writer.add_scalar("TNR/train", train_tnr, epoch)
+            writer.add_scalar("FNR/train", train_fnr, epoch)
+            train_loss_epochs.append(train_loss)
+
+            '''------Validation------'''
+            val_f1 = self.validate(dataset=val_data)
+            writer.add_scalar("F1/val", val_f1, epoch)
+            val_f1_epochs.append(val_f1)
+            
+            print(f"Train Loss:{train_loss}, Train F1:{train_f1}, Validation F1:{val_f1}")
+
+
+            '''------Testing------'''
+            if epoch%5==0:
+                test_confmtx, test_f1, train_tpr, train_fpr, train_tnr, train_fnr = self.test(dataset=test_data, epoch=epoch)
+                test_f1_epochs.append(test_f1)
+                print(f"Test F1: {test_f1}")
+                writer.add_scalar("F1/test", val_f1, epoch)
+                writer.add_scalar("TPR/test", test_tpr, epoch)
+                writer.add_scalar("FPR/test", test_fpr, epoch)
+                writer.add_scalar("TNR/test", test_tnr, epoch)
+                writer.add_scalar("FNR/test", test_fnr,epoch)
+
+
+            '''------Saving------'''
+            print("Saving model")
+            torch.save(self.model.state_dict(), f"{large_file_dir}saved_model/{MODEL_NAME}.pth")
+            print("Model Saved")
+
+
+            torch.save({
+            'epoch': epoch,
+            'model_state_dict': self.model.state_dict(),
+            'optimizer_state_dict': optimizer.state_dict(),
+            'train_loss': train_loss,
+            }, f"checkpoints/{MODEL_NAME}_{epoch}.tar")
+            
+            
+    
+            print("Epoch Completed. Proceeding to next epoch...")
+
+        print(f"Training Completed for {epochs} epochs.")
 
 
 
