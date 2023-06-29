@@ -177,7 +177,6 @@ class ChestXRayDataset(Dataset):
         try:
             image = Image.open(image_path).convert('L')
             image = self.transform(image)
-            print(image.shape)
         except (OSError, IOError):
             image = torch.rand(1, 256, 256)
 
@@ -255,7 +254,7 @@ class ChestXRayDataset(Dataset):
 
 
 class ChestXRayDataLoader:
-    def __init__(self, batch_size, num_classes=16):
+    def __init__(self, batch_size, num_classes=15):
         image_dir = f'{root_dir}/images/'
         self.train_dataset = ChestXRayDataset(f'Datasets/multilabel_classification/sample_labels_train.csv', image_dir, num_classes)
         self.val_dataset = ChestXRayDataset(f'Datasets/multilabel_classification/sample_labels_val.csv', image_dir, num_classes)

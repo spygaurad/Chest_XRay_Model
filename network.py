@@ -9,7 +9,7 @@ class EfficientNet(nn.Module):
         self.preConv = nn.Conv2d(1, 3, 3, 1, padding='same')
         self.effnet = timm.create_model('tf_efficientnetv2_b0', num_classes=64, pretrained=True)
         self.fc1 = nn.Linear(64, 32)
-        self.classficationLayer = nn.Linear(32, 16)
+        self.classficationLayer = nn.Linear(32, 15)
         self.relu = nn.ReLU()
         self.sigmoid = nn.Sigmoid()
     

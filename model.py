@@ -146,7 +146,10 @@ class Model():
         for i, (images, labels) in tqdm(enumerate(dataset), total=len(dataset)):
             optimizer.zero_grad()
             images, labels = images.to(DEVICE), labels.to(DEVICE)
+            print(images.shape)
+            print(labels.shape)
             _, outputs = self.model(images)
+            print(outputs.shape)
             loss = loss_func(outputs, labels)
             running_loss += loss.item()
 
