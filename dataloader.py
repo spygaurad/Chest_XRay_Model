@@ -201,8 +201,9 @@ class ChestXRayDataset(Dataset):
         selected_labels = sorted_labels[:]
 
         class_mapping = {label: i for i, label in enumerate(selected_labels)}
-        print(class_mapping)
+
         return class_mapping
+
 
     def _create_label_vector(self, labels):
         label_vector = torch.zeros(self.num_classes, dtype=torch.float32)
@@ -211,6 +212,7 @@ class ChestXRayDataset(Dataset):
                 label_index = self.class_mapping[label]
                 label_vector[label_index] = 1.0
         return label_vector
+
 
     def _read_csv(self, csv_file):
         data = []
