@@ -175,10 +175,11 @@ class ChestXRayDataset(Dataset):
         labels = row[1].split('|')
         label_vector = self._create_label_vector(labels)
         try:
-            image = Image.open(image_path).convert('RGB')
+            image = Image.open(image_path).convert('L')
             image = self.transform(image)
+            print(image.shape)
         except (OSError, IOError):
-            image = torch.rand(3, 256, 256)
+            image = torch.rand(1, 256, 256)
 
         return image, label_vector
 
