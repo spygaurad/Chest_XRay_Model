@@ -201,6 +201,7 @@ class ChestXRayDataset(Dataset):
         selected_labels = sorted_labels[:]
 
         class_mapping = {label: i for i, label in enumerate(selected_labels)}
+        print(class_mapping)
         return class_mapping
 
     def _create_label_vector(self, labels):
