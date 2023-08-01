@@ -21,8 +21,8 @@ from tensorboardX import SummaryWriter
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 if DEVICE == "cuda":
     torch.cuda.empty_cache()
-BATCH_SIZE = 64
-MODEL_NAME = "EfficientNet_1_NIH_New_Sample_GreyScale"
+BATCH_SIZE = 8
+MODEL_NAME = "EfficientNet_1_SampleDataset"
 LEARNING_RATE = 1e-3
 LEARNING_RATE_SCHEDULE_FACTOR = 0.1
 LEARNING_RATE_SCHEDULE_PATIENCE = 5
@@ -72,7 +72,6 @@ class Model():
             loss = loss_func(outputs, labels)
             running_loss += loss.item()
 
-            outputs = outputs
             predicted = (outputs > 0.6).float()  # Convert probabilities to binary predictions
             true_labels.extend(labels.cpu().numpy())
             predicted_labels.extend(predicted.cpu().numpy())
@@ -150,7 +149,6 @@ class Model():
                 img, labels = img.to(DEVICE), labels.to(DEVICE)
                 _, outputs = self.model(img)
 
-                outputs = F.sigmoid(outputs)
                 predicted = (outputs > 0.6).float()  # Convert probabilities to binary predictions
                 true_labels.extend(labels.cpu().numpy())
                 predicted_labels.extend(predicted.cpu().numpy())
@@ -179,7 +177,6 @@ class Model():
                 img, labels = img.to(DEVICE), labels.to(DEVICE)
                 _, outputs = self.model(img)
 
-                outputs = F.sigmoid(outputs)
                 predicted = (outputs > 0.6).float()  # Convert probabilities to binary predictions
                 true_labels.extend(labels.cpu().numpy())
                 predicted_labels.extend(predicted.cpu().numpy())

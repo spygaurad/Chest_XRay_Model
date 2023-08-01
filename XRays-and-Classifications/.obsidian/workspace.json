@@ -1,0 +1,190 @@
+{
+  "main": {
+    "id": "36717fdc19606d3a",
+    "type": "split",
+    "children": [
+      {
+        "id": "7f33a1c7b1891a0b",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "a5424c9c6ea2ff28",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "ML Models/jfhealthcare - CheXPert.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "1670e95816361d4e",
+            "type": "leaf",
+            "state": {
+              "type": "graph",
+              "state": {}
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "378c42abe96e7e1b",
+    "type": "split",
+    "children": [
+      {
+        "id": "5f1eaf26fd103d4d",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "c1ff332cc751d35c",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "8d59e97b55521507",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "a3cad6c7a4b60426",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {}
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 200
+  },
+  "right": {
+    "id": "fdc0a3a09f242cd2",
+    "type": "split",
+    "children": [
+      {
+        "id": "8f684f3f4ed32477",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "e29a6f664358b234",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "ML Models/jfhealthcare - CheXPert.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "2c09dfe782ae69ca",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "ML Models/jfhealthcare - CheXPert.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "1d8e95124fd42281",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true
+              }
+            }
+          },
+          {
+            "id": "ed726bc6ce8f772f",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "ML Models/jfhealthcare - CheXPert.md"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false
+    }
+  },
+  "active": "a5424c9c6ea2ff28",
+  "lastOpenFiles": [
+    "ML Models/Stanford Model.md",
+    "ML Models/jfhealthcare - CheXPert.md",
+    "ML Models/gaetandi - cheXpert.md",
+    "ML Models/simongrest - Replicating CheXPert.md",
+    "Datasets/Stanford CheXPert.md",
+    "Application of XRays.md",
+    "Pasted image 20230728132219.png",
+    "ML Models",
+    "Datasets/Untitled.md",
+    "Untitled 1.md",
+    "Pasted image 20230727172525.png",
+    "Pasted image 20230727172438.png",
+    "Chest Radiography.md",
+    "Medical Imaging.md",
+    "Datasets",
+    "X Ray.md",
+    "Orthopedics.md",
+    "Medical Application of X Rays.md",
+    "Dentistry.md",
+    "Fluoroscopy.md",
+    "Angiography.md",
+    "Security.md",
+    "Archeology.md",
+    "Art.md",
+    "Computed Tomography (CT).md",
+    "Mammography.md",
+    "Industries.md",
+    "Material Analysis.md",
+    "X-Rays.md",
+    "X Rays"
+  ]
+}
