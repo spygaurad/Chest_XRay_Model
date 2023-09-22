@@ -1,4 +1,5 @@
-from libauc.losses import AUCM_MultiLabel, CrossEntropyLoss
+from libauc.losses.auc import mAUCMLoss
+from libauc.losses import CrossEntropyLoss
 from libauc.optimizers import PESG, Adam
 from libauc.models import densenet121 as DenseNet121
 from libauc.datasets import CheXpert
@@ -9,7 +10,7 @@ import numpy as np
 import torch 
 import torchvision.transforms as transforms
 from torch.utils.data import Dataset
-import torch.nn.functional as F   
+import torch.nn.functional as F  
 
 
 
@@ -107,7 +108,7 @@ model.load_state_dict(state_dict)
 
 
 # define loss & optimizer
-loss_fn = AUCM_MultiLabel(num_classes=5)
+loss_fn = mAUCMLoss(num_classes=5)
 optimizer = PESG(model, loss_fn=loss_fn,lr=lr, margin=margin, epoch_decay=epoch_decay, weight_decay=weight_decay)
 
 
@@ -153,3 +154,6 @@ for epoch in range(2):
                 torch.save(model.state_dict(), f'aucm_pretrained_model_{epoch}.pth')
 
             print ('Epoch=%s, BatchID=%s, Val_AUC=%.4f, Best_Val_AUC=%.4f'%(epoch, idx, val_auc_mean, best_val_auc))
+
+
+
