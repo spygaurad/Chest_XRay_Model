@@ -11,6 +11,7 @@ import torch
 import torchvision.transforms as transforms
 from torch.utils.data import Dataset
 import torch.nn.functional as F  
+from tqdm import tqdm as tqdm
 
 
 
@@ -28,19 +29,15 @@ def calculate_class_weights(y):
     return class_counts
 
 
-root = './CheXpert/CheXpert-v1.0-small/'
+root = '/home/optimus/Downloads/Datasets/CheXpert-v1.0-small/'
 # Index=-1 denotes multi-label with 5 diseases
-traindSet = CheXpert(csv_path='Datasets/train.csv', image_root_path=root, use_upsampling=False, use_frontal=True, image_size=224, mode='train', class_index=-1, verbose=False)
-testSet =  CheXpert(csv_path='Datasets/valid.csv',  image_root_path=root, use_upsampling=False, use_frontal=True, image_size=224, mode='valid', class_index=-1, verbose=False)
+traindSet = CheXpert(csv_path='CNN_Based_Models/Datasets/train.csv', image_root_path=root, use_upsampling=False, use_frontal=True, image_size=224, mode='train', class_index=-1, verbose=False)
+testSet =  CheXpert(csv_path='CNN_Based_Models/Datasets/valid.csv',  image_root_path=root, use_upsampling=False, use_frontal=True, image_size=224, mode='valid', class_index=-1, verbose=False)
 trainloader =  torch.utils.data.DataLoader(traindSet, batch_size=64, num_workers=2, shuffle=True)
 testloader =  torch.utils.data.DataLoader(testSet, batch_size=64, num_workers=2, shuffle=False)
-train_class_weights = calculate_class_weights(traindSet.labels)
+train_class_weights = torch.tensor(traindSet.imratio_list)
+classes = traindSet.select_cols
 
-# Print the class weights.
-print(train_class_weights)
-
-# check imbalance ratio for each task
-print (traindSet.imratio_list)
 
 # paramaters
 SEED = 123
@@ -57,7 +54,7 @@ model = torch.nn.Sequential(DenseNet121(pretrained=True, last_activation=None, a
 model = model.cuda()
 
 # define loss & optimizer
-CELoss = torch.nn.BCEWithLogitsLoss()
+CELoss = torch.nn.BCEWithLogitsLoss(pos_weight=train_class_weights.to('cuda'))
 optimizer = Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
 
 # training
