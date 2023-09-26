@@ -18,7 +18,7 @@ def set_all_seeds(SEED):
 
 # paramaters
 SEED = 123
-BATCH_SIZE = 32
+BATCH_SIZE = 64
 model_name = "Densenet"
 device = "cuda" if torch.cuda.is_available() else 'cpu'
 base_dir = "CNN_Based_Models/"
@@ -137,7 +137,6 @@ def train(lr=1e-4, epoch_decay=2e-3, weight_decay=1e-5, margin=1.0, total_epochs
             torch.cuda.empty_cache()
             
 
-
     print("First Phase Training...")
     if include_class_weights:
         loss_fn = torch.nn.BCEWithLogitsLoss(pos_weight=class_weights.to('cuda'))
@@ -169,4 +168,14 @@ def train(lr=1e-4, epoch_decay=2e-3, weight_decay=1e-5, margin=1.0, total_epochs
     print("Training With mAUCM Loss Complete")
 
 
-train()
+
+def infer_a_sample(image):
+    model = DenseNet()
+    model = model.to(device)
+    image = image.to(device)
+    class_labels = get_dataloader_and_properties()
+
+
+
+if name == "__main__":
+    train()
