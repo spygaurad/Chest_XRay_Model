@@ -6,7 +6,6 @@ from PIL import Image, ImageDraw
 
 
 def pcam_pooling(features, heatmap):
-    # Apply PCAM pooling to the features based on the heatmap
     pooled_features = torch.zeros(features.size(0), features.size(1))
     for i in range(features.size(0)):
         for j in range(features.size(1)):

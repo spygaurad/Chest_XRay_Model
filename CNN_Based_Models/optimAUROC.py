@@ -8,6 +8,7 @@ from tqdm import tqdm as tqdm
 
 from network import DenseNetWithPCAM as DenseNet
 from dataloader import get_dataloaders_and_properties
+from gradcam_fns import gradcam_pcam, overlay_heatmap
 
 def set_all_seeds(SEED):
     # REPRODUCIBILITY
@@ -169,13 +170,27 @@ def train(lr=1e-4, epoch_decay=2e-3, weight_decay=1e-5, margin=1.0, total_epochs
 
 
 
-def infer_a_sample(image):
-    model = DenseNet()
+def infer_a_sample(image, inference_dir):
+
+    def load_model():
+        model = DenseNet()
+        PATH = f'{base_dir}output_dir/auc_max/model_5.pth' 
+        state_dict = torch.load(PATH)
+        model.load_state_dict(state_dict)
+        return model
+    
+    model = load_model()
     model = model.to(device)
     image = image.to(device)
-    class_labels = get_dataloader_and_properties()
+    class_labels = get_dataloaders_and_properties()[3]
+    
+    for target_class, class_name in enumerate(class_labels):
+        heatmap, _ = gradcam_pcam(model, image, target_class)
+        result_image = overlay_heatmap(image, heatmap, target_class, class_labels)
+        result_image.save(f"{inference_dir}")
 
 
 
-if name == "__main__":
-    train()
+infer_a_sample()
+# if name == "__main__":
+#     train()
