@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch 
 from tqdm import tqdm as tqdm
+import cv2
 
 from network import DenseNetWithPCAM as DenseNet
 from dataloader import get_dataloaders_and_properties
@@ -28,7 +29,7 @@ set_all_seeds(SEED)
 print(device)
 
 
-def train(lr=1e-4, epoch_decay=2e-3, weight_decay=1e-5, margin=1.0, total_epochs=2, include_class_weights=False):
+def train(lr=1e-4, epoch_decay=2e-3, weight_decay=1e-5, margin=1.0, total_epochs=2, include_class_weights=True):
     
     #model's properties
     model = DenseNet()
@@ -98,7 +99,7 @@ def train(lr=1e-4, epoch_decay=2e-3, weight_decay=1e-5, margin=1.0, total_epochs
             for jdx, data in enumerate(testloader):
                 test_data, test_labels = data
                 test_data = test_data.to(device)
-                y_pred, features = model(test_data)
+                y_pred, _, _ = model(test_data)
                 test_pred.append(torch.nn.functional.sigmoid(y_pred).cpu().detach().numpy())
                 test_true.append(test_labels.numpy())
                 torch.cuda.empty_cache()
@@ -109,34 +110,35 @@ def train(lr=1e-4, epoch_decay=2e-3, weight_decay=1e-5, margin=1.0, total_epochs
             val_auc = roc_auc_score(test_true, test_pred, average="weighted")
 
             if best_val_auc < val_auc:
-                best_val_auc = val_auc
-                save_model(epoch, output_dir)
                 metrics = calculate_metrics(test_true, test_pred, output_dir, 0.5)
                 write_metrics_in_file(epoch, idx, loss_fn, classes, val_auc, metrics, output_dir)
-            
-            print ('Epoch=%s, BatchID=%s, Val_AUC=%.4f, Best_Val_AUC=%.4f'%(epoch, idx, val_auc, best_val_auc ))
 
         model.train()
+        return val_auc
 
 
-    def train_epoch(epoch, loss_fn, output_dir, best_val_auc):
+    def train_epoch(epoch, loss_fn, output_dir):
         
         model.train()
-
+        best_val_auc = 0
         for idx, (train_data, train_labels) in tqdm(enumerate(trainloader), total=len(trainloader)):
-
-            if idx % 200 == 0 or idx==(len(trainloader)-1):
-                eval_epoch(epoch, idx, loss_fn, output_dir, best_val_auc)
 
             train_data, train_labels  = train_data.to(device), train_labels.to(device)
             optimizer.zero_grad()
-            y_pred, features = model(train_data)
+            y_pred, _, _ = model(train_data)
             loss = loss_fn(y_pred, train_labels)
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
             torch.cuda.empty_cache()
             
+            if idx % 200 == 0 or idx==(len(trainloader)-1):
+                val_auc = eval_epoch(epoch, idx, loss_fn, output_dir, best_val_auc)
+                if best_val_auc < val_auc:
+                    save_model(epoch, output_dir)
+                    best_val_auc = val_auc
+                    print ('Epoch=%s, BatchID=%s, Val_AUC=%.4f, Best_Val_AUC=%.4f'%(epoch, idx, val_auc, best_val_auc ))
+                
 
     print("First Phase Training...")
     if include_class_weights:
@@ -146,8 +148,8 @@ def train(lr=1e-4, epoch_decay=2e-3, weight_decay=1e-5, margin=1.0, total_epochs
     optimizer = Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
     output_dir = f"{base_dir}output_dir/CE/"
 
-    for epoch in range(2):
-        train_epoch(epoch, loss_fn, output_dir, best_val_auc=0)
+    for epoch in range(5):
+        train_epoch(epoch, loss_fn, output_dir)
 
     print("Training With Cross Entropy Loss Complete")
 
@@ -164,33 +166,49 @@ def train(lr=1e-4, epoch_decay=2e-3, weight_decay=1e-5, margin=1.0, total_epochs
     output_dir = f"{base_dir}output_dir/auc_max/"
 
     for epoch in range(5):
-        train_epoch(epoch, loss_fn, output_dir, best_val_auc=0)
+        train_epoch(epoch, loss_fn, output_dir)
 
     print("Training With mAUCM Loss Complete")
 
 
 
-def infer_a_sample(image, inference_dir):
+def infer_a_sample(image):
 
     def load_model():
         model = DenseNet()
-        PATH = f'{base_dir}output_dir/auc_max/model_5.pth' 
+        PATH = f'{base_dir}output_dir/CE/model_1.pth' 
         state_dict = torch.load(PATH)
         model.load_state_dict(state_dict)
         return model
     
+    def preprocess_image(image, image_size=224):
+        image = np.array(image)
+        if len(image.shape) == 2:
+            image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
+        image = cv2.resize(image, dsize=(image_size, image_size), interpolation=cv2.INTER_LINEAR)
+        image = image / 255.0
+        mean = np.array([0.485, 0.456, 0.406])
+        std = np.array([0.229, 0.224, 0.225])
+        image = (image - mean) / std
+        image = image.transpose((2, 0, 1)).astype(np.float32)
+        image = torch.tensor(image)
+        return image
+
     model = load_model()
     model = model.to(device)
+    _input = preprocess_image(image)
     image = image.to(device)
+
     class_labels = get_dataloaders_and_properties()[3]
-    
+    inference_dir = "/home/wiseyak/saumya/Chest_XRay_Model/CNN_Based_Models/output_dir/inferences/"
     for target_class, class_name in enumerate(class_labels):
-        heatmap, _ = gradcam_pcam(model, image, target_class)
+        heatmap, _ = gradcam_pcam(model, _input, target_class)
         result_image = overlay_heatmap(image, heatmap, target_class, class_labels)
-        result_image.save(f"{inference_dir}")
+        result_image.save(f"{inference_dir}{target_class}.png")
+        print("Hello")
 
 
 
-infer_a_sample()
+# infer_a_sample()
 # if name == "__main__":
-#     train()
+# train()

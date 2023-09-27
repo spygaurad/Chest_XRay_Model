@@ -5,21 +5,15 @@ from torchvision import transforms
 from PIL import Image, ImageDraw
 
 
-def pcam_pooling(features, heatmap):
-    pooled_features = torch.zeros(features.size(0), features.size(1))
-    for i in range(features.size(0)):
-        for j in range(features.size(1)):
-            pooled_features[i, j] = torch.sum(features[i, j] * heatmap[i])
-    return pooled_features
-
 
 def gradcam_pcam(model, x, target_class):
     model.eval()
-    
-    logits, features = model(x)
-    
+
+    logits, features, pcams = model(x)
+
     one_hot = torch.zeros_like(logits)
     one_hot[:, target_class] = 1
+
     logits.backward(gradient=one_hot, retain_graph=True)
 
     gradients = model.features[0].weight.grad
@@ -29,13 +23,12 @@ def gradcam_pcam(model, x, target_class):
     for i in range(pooled_gradients.shape[1]):
         features[:, i, :, :] *= pooled_gradients[0, i]
 
+    # Calculate the heatmap for the target class
     heatmap = torch.mean(features, dim=1).unsqueeze(0)
     heatmap = F.relu(heatmap)
     heatmap /= torch.max(heatmap)
-    
-    pooled_features = pcam_pooling(features, heatmap)
-    
-    return heatmap, logits
+
+    return heatmap, pcams
 
 
 def overlay_heatmap(image, heatmap, target_class, class_labels):
