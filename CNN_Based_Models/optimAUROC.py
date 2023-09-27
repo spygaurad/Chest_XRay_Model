@@ -28,10 +28,10 @@ set_all_seeds(SEED)
 
 print(device)
 
+threshold = [0.001, 0.2, 0.005, 0.027, 0.07]
 
 def train(lr=1e-4, epoch_decay=2e-3, weight_decay=1e-5, margin=1.0, total_epochs=2, include_class_weights=True):
     
-    threshold = [0.001, 0.2, 0.005, 0.027, 0.07]
     
     #model's properties
     model = DenseNet()
