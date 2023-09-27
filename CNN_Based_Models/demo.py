@@ -12,7 +12,6 @@ import cv2
 # Define your inference function
 def infer_image(image_path):
 
-    
     image = Image.open(image_path)
 
     result_images = infer_a_sample(image)

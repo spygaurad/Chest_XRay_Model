@@ -69,7 +69,7 @@ def train(lr=1e-4, epoch_decay=2e-3, weight_decay=1e-5, margin=1.0, total_epochs
             fpr = calc_fpr(fp, tn)
             fnr = calc_fnr(fn, tp)
             tnr = calc_tnr(tn, fp)
-            precision, recall, f1, _ = precision_recall_fscore_support(test_true[:, i], (test_pred[:, i] > 0.5).astype(int), average="binary")
+            precision, recall, f1, _ = precision_recall_fscore_support(test_true[:, i], (test_pred[:, i] > 0.5).astype(int), average="binary", zero_division=1)
             class_auroc = roc_auc_score(test_true[:, i], test_pred[:, i])
             plot_roc_curves(fpr_list, tpr_list, class_auroc, classes[i])
             metrics.append([tp, fp, fn, tn, tpr, fpr, fnr, tnr, precision, recall, f1, class_auroc])
@@ -192,22 +192,31 @@ def infer_a_sample(image):
         image = (image - mean) / std
         image = image.transpose((2, 0, 1)).astype(np.float32)
         image = torch.tensor(image)
+        image = image.unsqueeze(dim=0)
         return image
 
     model = load_model()
     model = model.to(device)
     _input = preprocess_image(image)
-    image = image.to(device)
+    _input = _input.to(device)
 
     class_labels = get_dataloaders_and_properties()[3]
+    result_images = []
     inference_dir = "/home/wiseyak/saumya/Chest_XRay_Model/CNN_Based_Models/output_dir/inferences/"
     for target_class, class_name in enumerate(class_labels):
-        heatmap, _ = gradcam_pcam(model, _input, target_class)
-        result_image = overlay_heatmap(image, heatmap, target_class, class_labels)
-        result_image.save(f"{inference_dir}{target_class}.png")
-        print("Hello")
+        heatmap, _, logits = gradcam_pcam(model, _input, target_class)
+        result_image = overlay_heatmap(image, heatmap, class_name)
+        result_image.save(f"{inference_dir}{class_name}.png")
+        result_images.append(result_image)
+        break
+    
+    return result_images[0], logits
 
 
+# from PIL import Image
+# path = "/home/optimus/Downloads/Datasets/CheXpert-v1.0-small/train/patient00007/study2/view1_frontal.jpg"
+# image = Image.open(path)
+# infer_a_sample(image)
 
 # infer_a_sample()
 # if name == "__main__":
