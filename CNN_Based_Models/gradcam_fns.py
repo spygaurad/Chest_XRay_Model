@@ -35,7 +35,7 @@ def gradcam_pcam(model, x, target_class):
     
     pooled_features = pcam_pooling(features, heatmap)
     
-    return heatmap, pooled_features
+    return heatmap, logits
 
 
 def overlay_heatmap(image, heatmap, target_class, class_labels):

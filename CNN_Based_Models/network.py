@@ -2,6 +2,7 @@
 import torch
 import torch.nn as nn
 from torchvision.models import densenet121
+import torch.nn.functional as F
 
 class DenseNetWithPCAM(nn.Module):
     def __init__(self, num_classes=5):
@@ -16,11 +17,15 @@ class DenseNetWithPCAM(nn.Module):
         # Forward pass through the convolutional layers (features)
         features = self.features(x)
         
-        # Global Average Pooling (GAP)
-        pooled_features = self.avgpool(features)
-        pooled_features = pooled_features.view(pooled_features.size(0), -1)
-        
+        # PCAM Pooling
+        pcams = torch.zeros(features.size(0), features.size(1), features.size(2), features.size(3))
+
+        for i in range(features.size(0)):
+            for j in range(features.size(1)):
+                pcams[i, j] = features[i, j] * torch.max(features[i, j])
+
         # Forward pass through the classifier
-        logits = self.fc2(self.relu(self.fc1(pooled_features)))
+        pcams = pcams.view(pcams.size(0), -1)
+        logits = self.fc2(self.relu(self.fc1(pcams)))
         
         return logits, features
