@@ -31,6 +31,8 @@ print(device)
 
 def train(lr=1e-4, epoch_decay=2e-3, weight_decay=1e-5, margin=1.0, total_epochs=2, include_class_weights=True):
     
+    threshold = [0.001, 0.2, 0.005, 0.027, 0.07]
+    
     #model's properties
     model = DenseNet()
     model = model.to(device)
@@ -39,7 +41,7 @@ def train(lr=1e-4, epoch_decay=2e-3, weight_decay=1e-5, margin=1.0, total_epochs
     trainloader, testloader, class_weights, classes = get_dataloaders_and_properties()
 
 
-    def calculate_metrics(test_true, test_pred, output_dir, threshold=0.5):
+    def calculate_metrics(test_true, test_pred, output_dir):
 
         def calc_tpr(tp, fn): return tp/(tp+fn)
         def calc_fpr(fp, tn): return fp/(fp+tn)
@@ -63,8 +65,9 @@ def train(lr=1e-4, epoch_decay=2e-3, weight_decay=1e-5, margin=1.0, total_epochs
 
         for i in range(len(classes)):
             fpr_list, tpr_list, _ = roc_curve(test_true[:, i], test_pred[:, i])
-            cm = confusion_matrix(test_true[:, i], (test_pred[:, i] > threshold).astype(int))
-            tn, fp, fn, tp = cm.ravel()
+            preds = (test_pred[:, i]>threshold[i])*1.
+            cm = confusion_matrix(test_true[:, i], preds).astype(int)
+            tp, fp, fn, tn = cm.ravel()
             tpr = calc_tpr(tp, fn)
             fpr = calc_fpr(fp, tn)
             fnr = calc_fnr(fn, tp)
@@ -79,7 +82,8 @@ def train(lr=1e-4, epoch_decay=2e-3, weight_decay=1e-5, margin=1.0, total_epochs
 
     def write_metrics_in_file(epoch, idx, CELoss, classes, val_auc, metrics, output_dir):
         with open(f"{output_dir}training_metrics.txt", "a") as file:
-            file.write(f"Epoch: {epoch}, Iteration:{idx} Loss:{CELoss}\n\n")
+            # file.write(f"Epoch: {epoch}, Iteration:{idx} Loss:{CELoss}\n\n")
+            file.write(f"Testing across threshold: {threshold}\n\n")
             file.write("| Class | TP | FP | FN | TN | TPR | FPR | FNR | TNR | Precision | Recall | F1 | AUROC |\n")
             file.write("|-------|-------|----|----|----|----|-----|-----|-----|-----|-----------|--------|----|\n")
             for i in range(len(classes)):
@@ -100,7 +104,8 @@ def train(lr=1e-4, epoch_decay=2e-3, weight_decay=1e-5, margin=1.0, total_epochs
                 test_data, test_labels = data
                 test_data = test_data.to(device)
                 y_pred, _, _ = model(test_data)
-                test_pred.append(torch.nn.functional.sigmoid(y_pred).cpu().detach().numpy())
+                pred_labels = torch.nn.functional.sigmoid(y_pred).cpu().detach().numpy()
+                test_pred.append(pred_labels)
                 test_true.append(test_labels.numpy())
                 torch.cuda.empty_cache()
 
@@ -110,7 +115,7 @@ def train(lr=1e-4, epoch_decay=2e-3, weight_decay=1e-5, margin=1.0, total_epochs
             val_auc = roc_auc_score(test_true, test_pred, average="weighted")
 
             if best_val_auc < val_auc:
-                metrics = calculate_metrics(test_true, test_pred, output_dir, 0.5)
+                metrics = calculate_metrics(test_true, test_pred, output_dir)
                 write_metrics_in_file(epoch, idx, loss_fn, classes, val_auc, metrics, output_dir)
 
         model.train()
@@ -123,22 +128,23 @@ def train(lr=1e-4, epoch_decay=2e-3, weight_decay=1e-5, margin=1.0, total_epochs
         best_val_auc = 0
         for idx, (train_data, train_labels) in tqdm(enumerate(trainloader), total=len(trainloader)):
 
-            train_data, train_labels  = train_data.to(device), train_labels.to(device)
-            optimizer.zero_grad()
-            y_pred, _, _ = model(train_data)
-            loss = loss_fn(y_pred, train_labels)
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-            torch.cuda.empty_cache()
+            # train_data, train_labels  = train_data.to(device), train_labels.to(device)
+            # optimizer.zero_grad()
+            # y_pred, _, _ = model(train_data)
+            # loss = loss_fn(y_pred, train_labels)
+            # optimizer.zero_grad()
+            # loss.backward()
+            # optimizer.step()
+            # torch.cuda.empty_cache()
             
             if idx % 200 == 0 or idx==(len(trainloader)-1):
                 val_auc = eval_epoch(epoch, idx, loss_fn, output_dir, best_val_auc)
+                break
                 if best_val_auc < val_auc:
                     save_model(epoch, output_dir)
                     best_val_auc = val_auc
                     print ('Epoch=%s, BatchID=%s, Val_AUC=%.4f, Best_Val_AUC=%.4f'%(epoch, idx, val_auc, best_val_auc ))
-                
+            break
 
     print("First Phase Training...")
     if include_class_weights:
@@ -148,14 +154,14 @@ def train(lr=1e-4, epoch_decay=2e-3, weight_decay=1e-5, margin=1.0, total_epochs
     optimizer = Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
     output_dir = f"{base_dir}output_dir/CE/"
 
-    for epoch in range(5):
-        train_epoch(epoch, loss_fn, output_dir)
+    # for epoch in range(5):
+    #     train_epoch(epoch, loss_fn, output_dir)
 
     print("Training With Cross Entropy Loss Complete")
 
 
     #load the latest parameters
-    PATH = f'{base_dir}output_dir/CE/model_1.pth' 
+    PATH = f'{base_dir}output_dir/CE/model_4.pth' 
     state_dict = torch.load(PATH)
     model.load_state_dict(state_dict)
 
@@ -167,6 +173,7 @@ def train(lr=1e-4, epoch_decay=2e-3, weight_decay=1e-5, margin=1.0, total_epochs
 
     for epoch in range(5):
         train_epoch(epoch, loss_fn, output_dir)
+        break
 
     print("Training With mAUCM Loss Complete")
 
@@ -199,18 +206,22 @@ def infer_a_sample(image):
     model = model.to(device)
     _input = preprocess_image(image)
     _input = _input.to(device)
+    logits, _, _ = model(_input)
+    logits = torch.nn.functional.sigmoid(logits)
+    thresholds = [0.1, 0.1, 0.1, 0.1, 0.1]
+    indices_above_threshold = (logits > torch.tensor(thresholds, device=logits.device)).nonzero(as_tuple=True)[1].tolist()
 
     class_labels = get_dataloaders_and_properties()[3]
-    result_images = []
+    possible_diagnoses = [class_labels[i] for i in indices_above_threshold]
+    result_cams = []
     inference_dir = "/home/wiseyak/saumya/Chest_XRay_Model/CNN_Based_Models/output_dir/inferences/"
     for target_class, class_name in enumerate(class_labels):
         heatmap, _, logits = gradcam_pcam(model, _input, target_class)
         result_image = overlay_heatmap(image, heatmap, class_name)
         result_image.save(f"{inference_dir}{class_name}.png")
-        result_images.append(result_image)
+        result_cams.append(result_image)
         break
-    
-    return result_images[0], logits
+    return result_cams[0], possible_diagnoses
 
 
 # from PIL import Image
@@ -220,4 +231,4 @@ def infer_a_sample(image):
 
 # infer_a_sample()
 # if name == "__main__":
-# train()
+train()
