@@ -1,4 +1,5 @@
 from typing import Optional, List, Dict, Tuple
+import importlib.util
 
 from torch import Tensor
 import torch.nn as nn
@@ -8,7 +9,14 @@ from torchvision.models.detection.rpn import (
     concat_box_prediction_layers,
 )
 
-from .image_list import ImageList
+image_list_path = '/home/wiseyak/saumya/Chest_XRay_Model/region_guided_radiology_report_generator/src/object_detector/image_list.py'
+image_list_module = importlib.util.spec_from_file_location('image_list', image_list_path)
+image_list = importlib.util.module_from_spec(image_list_module)
+image_list_module.loader.exec_module(image_list)
+
+ImageList = image_list.ImageList
+
+
 
 
 class CustomRegionProposalNetwork(RegionProposalNetwork):

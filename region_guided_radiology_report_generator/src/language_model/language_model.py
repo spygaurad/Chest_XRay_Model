@@ -1,12 +1,12 @@
 from typing import Optional
-from typing import Tuple as tuple
+from typing import Tuple
 
 import torch
 import torch.nn as nn
 from torch.nn import CrossEntropyLoss
 from torchinfo import summary
 from transformers import GPT2LMHeadModel
-from transformers.generation_beam_search import BeamSearchScorer
+from transformers.generation import BeamSearchScorer
 
 
 class Conv1DWithTrainedWeights(nn.Module):
@@ -33,8 +33,8 @@ class Conv1DWithTrainedWeights(nn.Module):
 class GPT2PseudoAttention(nn.Module):
     def __init__(
         self,
-        c_attn_weights_and_bias: tuple[torch.FloatTensor],  # pre-trained weights and bias for retrieving query, key, value matrices
-        c_proj_weights_and_bias: tuple[torch.FloatTensor],  # pre-trained weights and bias for projecting concatenated heads to original hidden dim
+        c_attn_weights_and_bias: Tuple[torch.FloatTensor],  # pre-trained weights and bias for retrieving query, key, value matrices
+        c_proj_weights_and_bias: Tuple[torch.FloatTensor],  # pre-trained weights and bias for projecting concatenated heads to original hidden dim
     ):
 
         super().__init__()

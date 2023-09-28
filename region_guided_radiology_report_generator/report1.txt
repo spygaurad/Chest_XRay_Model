@@ -1,0 +1,11 @@
+Image path: /home/wiseyak/saumya/Chest_XRay_Model/Imgs/view1_frontal.jpg
+Generated report: The lungs are clear. 
+There is no pleural effusion or pneumothorax. 
+The cardiomediastinal silhouette and hilar contours are normal. 
+The mediastinal and hilar contours appear within normal limits.
+There are no acute osseous abnormalities. Heart size is normal. 
+No acute cardiopulmonary abnormality. 
+Right-sided Port-A-Cath tip terminates in the right atrium.
+
+==============================
+

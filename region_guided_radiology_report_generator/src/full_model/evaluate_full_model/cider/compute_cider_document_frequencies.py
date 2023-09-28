@@ -19,7 +19,17 @@ import pathlib
 from nltk.tokenize import wordpunct_tokenize
 from pycocoevalcap.cider.cider_scorer import CiderScorer
 
-from src.path_datasets_and_weights import path_full_dataset
+
+import importlib
+
+
+path_full_dataset_path = '/home/wiseyak/saumya/Chest_XRay_Model/region_guided_radiology_report_generator/src/path_datasets_and_weights.py'
+
+path_full_dataset_module = importlib.util.spec_from_file_location('path_full_dataset', path_full_dataset_path)
+path_full_dataset = importlib.util.module_from_spec(path_full_dataset_module)
+path_full_dataset_module.loader.exec_module(path_full_dataset)
+
+path_full_dataset = path_full_dataset.path_full_dataset
 
 
 def get_reference_reports_val_set():

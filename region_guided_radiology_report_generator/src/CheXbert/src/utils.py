@@ -3,12 +3,33 @@ import torch
 import torch.nn as nn
 import pandas as pd
 import numpy as np
-from src.CheXbert.src.models.bert_labeler import bert_labeler
-from src.CheXbert.src.bert_tokenizer import tokenize
 from sklearn.metrics import f1_score, confusion_matrix
 from statsmodels.stats.inter_rater import cohens_kappa
 from transformers import BertTokenizer
-from src.CheXbert.src.constants import *
+import importlib
+
+# Define the absolute file paths to your modules
+constants_path = '/home/wiseyak/saumya/Chest_XRay_Model/region_guided_radiology_report_generator/src/CheXbert/src/constants.py'
+bert_labeler_path = '/home/wiseyak/saumya/Chest_XRay_Model/region_guided_radiology_report_generator/src/CheXbert/src/models/bert_labeler.py'
+bert_tokenizer_path = '/home/wiseyak/saumya/Chest_XRay_Model/region_guided_radiology_report_generator/src/CheXbert/src/bert_tokenizer.py'
+
+# Load the modules using importlib
+constants_module = importlib.util.spec_from_file_location('constants', constants_path)
+constants = importlib.util.module_from_spec(constants_module)
+constants_module.loader.exec_module(constants)
+
+bert_labeler_module = importlib.util.spec_from_file_location('bert_labeler', bert_labeler_path)
+bert_labeler = importlib.util.module_from_spec(bert_labeler_module)
+bert_labeler_module.loader.exec_module(bert_labeler)
+
+bert_tokenizer_module = importlib.util.spec_from_file_location('bert_tokenizer', bert_tokenizer_path)
+bert_tokenizer = importlib.util.module_from_spec(bert_tokenizer_module)
+bert_tokenizer_module.loader.exec_module(bert_tokenizer)
+
+constants
+bert_labler = bert_labeler
+tokenize = bert_tokenizer.tokenize
+
 
 def get_weighted_f1_weights(train_path_or_csv):
     """Compute weights used to obtain the weighted average of

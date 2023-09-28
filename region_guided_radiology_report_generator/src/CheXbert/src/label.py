@@ -4,12 +4,36 @@ import torch
 import torch.nn as nn
 import pandas as pd
 import numpy as np
-from src.CheXbert.src import utils
-from src.CheXbert.src.models.bert_labeler import bert_labeler
-from collections import OrderedDict
-from src.CheXbert.src.datasets_chexbert.unlabeled_dataset import UnlabeledDataset
-from src.CheXbert.src.constants import *
 from tqdm import tqdm
+
+
+import importlib
+
+# Define the paths to your modules based on your existing code structure
+utils_path = '/home/wiseyak/saumya/Chest_XRay_Model/region_guided_radiology_report_generator/src/CheXbert/src/utils.py'
+bert_labeler_path = '/home/wiseyak/saumya/Chest_XRay_Model/region_guided_radiology_report_generator/src/CheXbert/src/models/bert_labeler.py'
+unlabeled_dataset_path = '/home/wiseyak/saumya/Chest_XRay_Model/region_guided_radiology_report_generator/src/CheXbert/src/datasets_chexbert/unlabeled_dataset.py'
+constants_path = '/home/wiseyak/saumya/Chest_XRay_Model/region_guided_radiology_report_generator/src/CheXbert/src/constants.py'
+
+# Load the modules using importlib
+utils_module = importlib.util.spec_from_file_location('utils', utils_path)
+utils = importlib.util.module_from_spec(utils_module)
+utils_module.loader.exec_module(utils)
+
+bert_labeler_module = importlib.util.spec_from_file_location('bert_labeler', bert_labeler_path)
+bert_labeler = importlib.util.module_from_spec(bert_labeler_module)
+bert_labeler_module.loader.exec_module(bert_labeler)
+
+unlabeled_dataset_module = importlib.util.spec_from_file_location('unlabeled_dataset', unlabeled_dataset_path)
+UnlabeledDataset = importlib.util.module_from_spec(unlabeled_dataset_module)
+unlabeled_dataset_module.loader.exec_module(UnlabeledDataset)
+
+constants_module = importlib.util.spec_from_file_location('constants', constants_path)
+constants = importlib.util.module_from_spec(constants_module)
+constants_module.loader.exec_module(constants)
+
+BATCH_SIZE = 8
+NUM_WORKERS = 8
 
 def collate_fn_no_labels(sample_list):
     """Custom collate function to pad reports in each batch to the max len,

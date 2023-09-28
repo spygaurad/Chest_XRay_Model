@@ -28,9 +28,33 @@ import torch
 import torchmetrics
 from tqdm import tqdm
 
-from src.dataset.constants import ANATOMICAL_REGIONS
-from src.full_model.evaluate_full_model.evaluate_language_model import evaluate_language_model
-from src.full_model.run_configurations import PRETRAIN_WITHOUT_LM_MODEL, WEIGHT_OBJECT_DETECTOR_LOSS, WEIGHT_BINARY_CLASSIFIER_REGION_SELECTION_LOSS, WEIGHT_BINARY_CLASSIFIER_REGION_ABNORMAL_LOSS, WEIGHT_LANGUAGE_MODEL_LOSS
+import importlib
+
+# Define the absolute file paths to your modules
+constants_path = '/home/wiseyak/saumya/Chest_XRay_Model/region_guided_radiology_report_generator/src/dataset/constants.py'
+evaluate_language_model_path = '/home/wiseyak/saumya/Chest_XRay_Model/region_guided_radiology_report_generator/src/full_model/evaluate_full_model/evaluate_language_model.py'
+run_configurations_path = '/home/wiseyak/saumya/Chest_XRay_Model/region_guided_radiology_report_generator/src/full_model/run_configurations.py'
+
+# Load the modules using importlib
+constants_module = importlib.util.spec_from_file_location('constants', constants_path)
+constants = importlib.util.module_from_spec(constants_module)
+constants_module.loader.exec_module(constants)
+
+evaluate_language_model_module = importlib.util.spec_from_file_location('evaluate_language_model', evaluate_language_model_path)
+evaluate_language_model = importlib.util.module_from_spec(evaluate_language_model_module)
+evaluate_language_model_module.loader.exec_module(evaluate_language_model)
+
+run_configurations_module = importlib.util.spec_from_file_location('run_configurations', run_configurations_path)
+run_configurations = importlib.util.module_from_spec(run_configurations_module)
+run_configurations_module.loader.exec_module(run_configurations)
+
+# Initialize the constants and functions
+ANATOMICAL_REGIONS = constants.ANATOMICAL_REGIONS
+evaluate_language_model = evaluate_language_model.evaluate_language_model
+WEIGHT_OBJECT_DETECTOR_LOSS = run_configurations.WEIGHT_OBJECT_DETECTOR_LOSS
+WEIGHT_BINARY_CLASSIFIER_REGION_SELECTION_LOSS = run_configurations.WEIGHT_BINARY_CLASSIFIER_REGION_SELECTION_LOSS
+WEIGHT_BINARY_CLASSIFIER_REGION_ABNORMAL_LOSS = run_configurations.WEIGHT_BINARY_CLASSIFIER_REGION_ABNORMAL_LOSS
+WEIGHT_LANGUAGE_MODEL_LOSS = run_configurations.WEIGHT_LANGUAGE_MODEL_LOSS
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 

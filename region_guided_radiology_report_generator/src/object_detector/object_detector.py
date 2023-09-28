@@ -1,6 +1,6 @@
 from collections import OrderedDict
 from typing import Optional, List, Dict
-
+import importlib.util
 import torch
 from torch import Tensor
 import torch.nn as nn
@@ -10,10 +10,28 @@ from torchvision.models.detection.faster_rcnn import TwoMLPHead, FastRCNNPredict
 from torchvision.models.detection.rpn import AnchorGenerator, RPNHead
 # from torchinfo import summary
 
-from custom_roi_heads import CustomRoIHeads
-from custom_rpn import CustomRegionProposalNetwork
-from image_list import ImageList
+# Define the absolute file paths to your modules
+custom_roi_heads_path = '/home/wiseyak/saumya/Chest_XRay_Model/region_guided_radiology_report_generator/src/object_detector/custom_roi_heads.py'
+custom_rpn_path = '/home/wiseyak/saumya/Chest_XRay_Model/region_guided_radiology_report_generator/src/object_detector/custom_rpn.py'
+image_list_path = '/home/wiseyak/saumya/Chest_XRay_Model/region_guided_radiology_report_generator/src/object_detector/image_list.py'
 
+# Load the modules using importlib
+custom_roi_heads_module = importlib.util.spec_from_file_location('custom_roi_heads', custom_roi_heads_path)
+custom_roi_heads = importlib.util.module_from_spec(custom_roi_heads_module)
+custom_roi_heads_module.loader.exec_module(custom_roi_heads)
+
+custom_rpn_module = importlib.util.spec_from_file_location('custom_rpn', custom_rpn_path)
+custom_rpn = importlib.util.module_from_spec(custom_rpn_module)
+custom_rpn_module.loader.exec_module(custom_rpn)
+
+image_list_module = importlib.util.spec_from_file_location('image_list', image_list_path)
+image_list = importlib.util.module_from_spec(image_list_module)
+image_list_module.loader.exec_module(image_list)
+
+# Import the classes
+CustomRoIHeads = custom_roi_heads.CustomRoIHeads
+CustomRegionProposalNetwork = custom_rpn.CustomRegionProposalNetwork
+ImageList = image_list.ImageList
 
 class ObjectDetector(nn.Module):
     """

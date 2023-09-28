@@ -180,7 +180,7 @@ def train(lr=1e-4, epoch_decay=2e-3, weight_decay=1e-5, margin=1.0, total_epochs
 
 
 def infer_a_sample(image):
-
+    device = 'cpu'
     def load_model():
         model = DenseNet()
         PATH = f'{base_dir}output_dir/CE/model_1.pth' 
@@ -202,11 +202,17 @@ def infer_a_sample(image):
         image = image.unsqueeze(dim=0)
         return image
 
+    import time
     model = load_model()
     model = model.to(device)
     _input = preprocess_image(image)
     _input = _input.to(device)
+    start_time = time.time()
     logits, _, _ = model(_input)
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    print(f"Took {elapsed_time} seconds to execute.")
+
     logits = torch.nn.functional.sigmoid(logits)
 
     indices_above_threshold = (logits > torch.tensor(threshold, device=logits.device)).nonzero(as_tuple=True)[1].tolist()
@@ -221,7 +227,7 @@ def infer_a_sample(image):
         result_image.save(f"{inference_dir}{class_name}.png")
         result_cams.append(result_image)
         break
-    return result_cams[0], possible_diagnoses
+    return result_cams[0], possible_diagnoses, elapsed_time
 
 
 # from PIL import Image

@@ -175,7 +175,7 @@ def main():
 
     # paths to the images that we want to generate reports for
     images_paths = [
-        "/home/wiseyak/saumya/Chest_XRay_Model/Imgs/view1_frontal.jpg.jpg",
+        "/home/wiseyak/saumya/Chest_XRay_Model/Imgs/view1_frontal.jpg",
         # ".../___.jpg",
         # ".../___.jpg",
     ]

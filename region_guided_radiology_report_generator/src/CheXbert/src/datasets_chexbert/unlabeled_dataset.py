@@ -1,6 +1,6 @@
 import torch
 from transformers import BertTokenizer
-from src.CheXbert.src import bert_tokenizer
+# from src.CheXbert.src import bert_tokenizer
 from torch.utils.data import Dataset
 
 class UnlabeledDataset(Dataset):

@@ -44,28 +44,62 @@ import torch
 import torch.nn as nn
 from tqdm import tqdm
 
-from src.CheXbert.src.constants import CONDITIONS
-from src.CheXbert.src.label import label
-from src.CheXbert.src.models.bert_labeler import bert_labeler
-from src.dataset.constants import ANATOMICAL_REGIONS
-from src.full_model.evaluate_full_model.cider.cider import Cider
-from src.full_model.run_configurations import (
-    BATCH_SIZE,
-    NUM_BEAMS,
-    MAX_NUM_TOKENS_GENERATE,
-    NUM_BATCHES_OF_GENERATED_SENTENCES_TO_SAVE_TO_FILE,
-    NUM_BATCHES_OF_GENERATED_REPORTS_TO_SAVE_TO_FILE,
-    NUM_BATCHES_TO_PROCESS_FOR_LANGUAGE_MODEL_EVALUATION,
-    NUM_IMAGES_TO_PLOT,
-    BERTSCORE_SIMILARITY_THRESHOLD,
-)
-from src.path_datasets_and_weights import path_chexbert_weights
+import importlib
+
+# Define the paths to your modules based on your existing code structure
+conditions_path = '/home/wiseyak/saumya/Chest_XRay_Model/region_guided_radiology_report_generator/src/CheXbert/src/constants.py'
+label_path = '/home/wiseyak/saumya/Chest_XRay_Model/region_guided_radiology_report_generator/src/CheXbert/src/label.py'
+bert_labeler_path = '/home/wiseyak/saumya/Chest_XRay_Model/region_guided_radiology_report_generator/src/CheXbert/src/models/bert_labeler.py'
+cider_path = '/home/wiseyak/saumya/Chest_XRay_Model/region_guided_radiology_report_generator/src/full_model/evaluate_full_model/cider/cider.py'
+run_configurations_path = '/home/wiseyak/saumya/Chest_XRay_Model/region_guided_radiology_report_generator/src/full_model/run_configurations.py'
+path_datasets_and_weights_path = '/home/wiseyak/saumya/Chest_XRay_Model/region_guided_radiology_report_generator/src/path_datasets_and_weights.py'
+
+# Load the modules using importlib
+conditions_module = importlib.util.spec_from_file_location('conditions', conditions_path)
+conditions = importlib.util.module_from_spec(conditions_module)
+conditions_module.loader.exec_module(conditions)
+
+label_module = importlib.util.spec_from_file_location('label', label_path)
+label = importlib.util.module_from_spec(label_module)
+label_module.loader.exec_module(label)
+
+bert_labeler_module = importlib.util.spec_from_file_location('bert_labeler', bert_labeler_path)
+bert_labeler = importlib.util.module_from_spec(bert_labeler_module)
+bert_labeler_module.loader.exec_module(bert_labeler)
+
+cider_module = importlib.util.spec_from_file_location('cider', cider_path)
+Cider = importlib.util.module_from_spec(cider_module)
+cider_module.loader.exec_module(Cider)
+
+run_configurations_module = importlib.util.spec_from_file_location('run_configurations', run_configurations_path)
+run_configurations = importlib.util.module_from_spec(run_configurations_module)
+run_configurations_module.loader.exec_module(run_configurations)
+
+path_datasets_and_weights_module = importlib.util.spec_from_file_location('path_datasets_and_weights', path_datasets_and_weights_path)
+path_datasets_and_weights = importlib.util.module_from_spec(path_datasets_and_weights_module)
+path_datasets_and_weights_module.loader.exec_module(path_datasets_and_weights)
+
+# Initialize additional variables and classes based on your prompt
+BATCH_SIZE = run_configurations.BATCH_SIZE
+NUM_BEAMS = run_configurations.NUM_BEAMS
+MAX_NUM_TOKENS_GENERATE = run_configurations.MAX_NUM_TOKENS_GENERATE
+NUM_BATCHES_OF_GENERATED_SENTENCES_TO_SAVE_TO_FILE = run_configurations.NUM_BATCHES_OF_GENERATED_SENTENCES_TO_SAVE_TO_FILE
+NUM_BATCHES_OF_GENERATED_REPORTS_TO_SAVE_TO_FILE = run_configurations.NUM_BATCHES_OF_GENERATED_REPORTS_TO_SAVE_TO_FILE
+NUM_BATCHES_TO_PROCESS_FOR_LANGUAGE_MODEL_EVALUATION = run_configurations.NUM_BATCHES_TO_PROCESS_FOR_LANGUAGE_MODEL_EVALUATION
+NUM_IMAGES_TO_PLOT = run_configurations.NUM_IMAGES_TO_PLOT
+BERTSCORE_SIMILARITY_THRESHOLD = run_configurations.BERTSCORE_SIMILARITY_THRESHOLD
+path_chexbert_weights = path_datasets_and_weights.path_chexbert_weights
+
+# Initialize the variables and classes based on the existing code structure
+CONDITIONS = conditions.CONDITIONS
+label_function = label.label
+bert_labeler = bert_labeler.bert_labeler
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-def compute_NLG_scores(nlg_metrics: list[str], gen_sents_or_reports: list[str], ref_sents_or_reports: list[str]) -> dict[str, float]:
-    def convert_for_pycoco_scorer(sents_or_reports: list[str]):
+def compute_NLG_scores(nlg_metrics, gen_sents_or_reports, ref_sents_or_reports):
+    def convert_for_pycoco_scorer(sents_or_reports):
         """
         The compute_score methods of the scorer objects require the input not to be list[str],
         but of the form:
@@ -122,7 +156,7 @@ def compute_NLG_scores(nlg_metrics: list[str], gen_sents_or_reports: list[str], 
     return nlg_scores
 
 
-def compute_clinical_efficacy_scores(language_model_scores: dict, gen_reports: list[str], ref_reports: list[str]):
+def compute_clinical_efficacy_scores(language_model_scores: dict, gen_reports, ref_reports):
     """
     This function computes:
         - micro average CE scores over all 14 conditions
@@ -911,8 +945,8 @@ def update_num_generated_sentences_per_image(
 
 def update_gen_and_ref_sentences_for_regions(
     gen_and_ref_sentences: dict,
-    generated_sents_for_selected_regions: list[str],
-    reference_sents_for_selected_regions: list[str],
+    generated_sents_for_selected_regions,
+    reference_sents_for_selected_regions,
     selected_regions: np.array
 ):
     """Updates the gen_and_ref_sentences dict for each of the 29 regions, i.e. appends the generated and reference sentences for the regions (if they exist)

@@ -6,7 +6,17 @@ import pickle
 import numpy as np
 from pycocoevalcap.cider.cider_scorer import CiderScorer
 
-from src.full_model.evaluate_full_model.cider.compute_cider_document_frequencies import compute_cider_df
+import importlib
+
+# Define the absolute file path to your module
+compute_cider_df_path = '/home/wiseyak/saumya/Chest_XRay_Model/region_guided_radiology_report_generator/src/full_model/evaluate_full_model/cider/compute_cider_document_frequencies.py'
+
+# Load the module using importlib
+compute_cider_df_module = importlib.util.spec_from_file_location('compute_cider_df', compute_cider_df_path)
+compute_cider_df = importlib.util.module_from_spec(compute_cider_df_module)
+compute_cider_df_module.loader.exec_module(compute_cider_df)
+
+compute_cider_df = compute_cider_df.compute_cider_df
 
 
 class CustomCiderScorer(CiderScorer):

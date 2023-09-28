@@ -14,7 +14,17 @@ but I use a custom cider scorer in line 41 that uses document frequencies calcul
 Inspired by Miura's implementation: (https://github.com/ysmiura/ifcc/blob/0c5c24ca8a5bba673ae32840e27a33481ae17d18/clinicgen/external/cider/cider.py).
 """
 
-from src.full_model.evaluate_full_model.cider.cider_scorer import CustomCiderScorer
+import importlib
+
+# Define the absolute file path to your module
+cider_scorer_path = '/home/wiseyak/saumya/Chest_XRay_Model/region_guided_radiology_report_generator/src/full_model/evaluate_full_model/cider/cider_scorer.py'
+
+# Load the module using importlib
+cider_scorer_module = importlib.util.spec_from_file_location('CustomCiderScorer', cider_scorer_path)
+CustomCiderScorer = importlib.util.module_from_spec(cider_scorer_module)
+cider_scorer_module.loader.exec_module(CustomCiderScorer)
+
+CustomCiderScorer = CustomCiderScorer.CustomCiderScorer
 
 
 class Cider:

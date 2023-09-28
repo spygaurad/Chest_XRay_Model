@@ -17,41 +17,86 @@ from torch.utils.data import DataLoader
 from transformers import GPT2Tokenizer
 from tqdm import tqdm
 
-from src.full_model.custom_collator import CustomCollator
-from src.full_model.custom_dataset import CustomDataset
-from src.full_model.evaluate_full_model.evaluate_model import evaluate_model
-from src.full_model.report_generation_model import ReportGenerationModel
-from src.full_model.run_configurations import (
-    RUN,
-    RUN_COMMENT,
-    SEED,
-    PRETRAIN_WITHOUT_LM_MODEL,
-    IMAGE_INPUT_SIZE,
-    PERCENTAGE_OF_TRAIN_SET_TO_USE,
-    PERCENTAGE_OF_VAL_SET_TO_USE,
-    BATCH_SIZE,
-    EFFECTIVE_BATCH_SIZE,
-    NUM_WORKERS,
-    EPOCHS,
-    LR,
-    EVALUATE_EVERY_K_BATCHES,
-    PATIENCE_LR_SCHEDULER,
-    THRESHOLD_LR_SCHEDULER,
-    FACTOR_LR_SCHEDULER,
-    COOLDOWN_LR_SCHEDULER,
-    NUM_BEAMS,
-    MAX_NUM_TOKENS_GENERATE,
-    NUM_BATCHES_OF_GENERATED_SENTENCES_TO_SAVE_TO_FILE,
-    NUM_BATCHES_OF_GENERATED_REPORTS_TO_SAVE_TO_FILE,
-    NUM_BATCHES_TO_PROCESS_FOR_LANGUAGE_MODEL_EVALUATION,
-    NUM_IMAGES_TO_PLOT,
-    BERTSCORE_SIMILARITY_THRESHOLD,
-    WEIGHT_OBJECT_DETECTOR_LOSS,
-    WEIGHT_BINARY_CLASSIFIER_REGION_SELECTION_LOSS,
-    WEIGHT_BINARY_CLASSIFIER_REGION_ABNORMAL_LOSS,
-    WEIGHT_LANGUAGE_MODEL_LOSS,
-)
-from src.path_datasets_and_weights import path_full_dataset, path_runs_full_model
+
+import importlib
+
+# Define the absolute file paths to your modules
+custom_collator_path = '/home/wiseyak/saumya/Chest_XRay_Model/region_guided_radiology_report_generator/src/full_model/custom_collator.py'
+custom_dataset_path = '/home/wiseyak/saumya/Chest_XRay_Model/region_guided_radiology_report_generator/src/full_model/custom_dataset.py'
+evaluate_model_path = '/home/wiseyak/saumya/Chest_XRay_Model/region_guided_radiology_report_generator/src/full_model/evaluate_full_model/evaluate_model.py'
+report_generation_model_path = '/home/wiseyak/saumya/Chest_XRay_Model/region_guided_radiology_report_generator/src/full_model/report_generation_model.py'
+run_configurations_path = '/home/wiseyak/saumya/Chest_XRay_Model/region_guided_radiology_report_generator/src/full_model/run_configurations.py'
+path_datasets_and_weights_path = '/home/wiseyak/saumya/Chest_XRay_Model/region_guided_radiology_report_generator/src/path_datasets_and_weights.py'
+
+# Load the modules using importlib
+# custom_collator_module = importlib.util.spec_from_file_location('custom_collator', custom_collator_path)
+# custom_collator = importlib.util.module_from_spec(custom_collator_module)
+# custom_collator_module.loader.exec_module(custom_collator)
+
+custom_dataset_module = importlib.util.spec_from_file_location('custom_dataset', custom_dataset_path)
+custom_dataset = importlib.util.module_from_spec(custom_dataset_module)
+custom_dataset_module.loader.exec_module(custom_dataset)
+
+evaluate_model_module = importlib.util.spec_from_file_location('evaluate_model', evaluate_model_path)
+evaluate_model = importlib.util.module_from_spec(evaluate_model_module)
+evaluate_model_module.loader.exec_module(evaluate_model)
+
+report_generation_model_module = importlib.util.spec_from_file_location('report_generation_model', report_generation_model_path)
+report_generation_model = importlib.util.module_from_spec(report_generation_model_module)
+report_generation_model_module.loader.exec_module(report_generation_model)
+
+run_configurations_module = importlib.util.spec_from_file_location('run_configurations', run_configurations_path)
+run_configurations = importlib.util.module_from_spec(run_configurations_module)
+run_configurations_module.loader.exec_module(run_configurations)
+
+path_datasets_and_weights_module = importlib.util.spec_from_file_location('path_datasets_and_weights', path_datasets_and_weights_path)
+path_datasets_and_weights = importlib.util.module_from_spec(path_datasets_and_weights_module)
+path_datasets_and_weights_module.loader.exec_module(path_datasets_and_weights)
+
+
+path_full_dataset = path_datasets_and_weights.path_full_dataset
+path_runs_full_model = path_datasets_and_weights.path_runs_full_model
+
+
+# CustomCollator = custom_collator.CustomCollator
+CustomDataset = custom_dataset.CustomDataset
+ReportGenerationModel = report_generation_model.ReportGenerationModel
+
+# Create an object of the evaluate_model() function.
+evaluate_model_function = evaluate_model
+
+# Create a dictionary of the run configurations.
+
+RUN = run_configurations.RUN,
+RUN_COMMENT = run_configurations.RUN_COMMENT,
+SEED = run_configurations.SEED,
+PRETRAIN_WITHOUT_LM_MODEL = run_configurations.PRETRAIN_WITHOUT_LM_MODEL,
+IMAGE_INPUT_SIZE = run_configurations.IMAGE_INPUT_SIZE,
+PERCENTAGE_OF_TRAIN_SET_TO_USE = run_configurations.PERCENTAGE_OF_TRAIN_SET_TO_USE,
+PERCENTAGE_OF_VAL_SET_TO_USE = run_configurations.PERCENTAGE_OF_VAL_SET_TO_USE,
+BATCH_SIZE = run_configurations.BATCH_SIZE,
+EFFECTIVE_BATCH_SIZE = run_configurations.EFFECTIVE_BATCH_SIZE,
+NUM_WORKERS = run_configurations.NUM_WORKERS,
+EPOCHS = run_configurations.EPOCHS,
+LR = run_configurations.LR,
+EVALUATE_EVERY_K_BATCHES = run_configurations.EVALUATE_EVERY_K_BATCHES,
+PATIENCE_LR_SCHEDULER = run_configurations.PATIENCE_LR_SCHEDULER,
+THRESHOLD_LR_SCHEDULER = run_configurations.THRESHOLD_LR_SCHEDULER,
+FACTOR_LR_SCHEDULER = run_configurations.FACTOR_LR_SCHEDULER,
+COOLDOWN_LR_SCHEDULER = run_configurations.COOLDOWN_LR_SCHEDULER,
+NUM_BEAMS = run_configurations.NUM_BEAMS,
+MAX_NUM_TOKENS_GENERATE = run_configurations.MAX_NUM_TOKENS_GENERATE,
+NUM_BATCHES_OF_GENERATED_SENTENCES_TO_SAVE_TO_FILE = run_configurations.NUM_BATCHES_OF_GENERATED_SENTENCES_TO_SAVE_TO_FILE,
+NUM_BATCHES_OF_GENERATED_REPORTS_TO_SAVE_TO_FILE = run_configurations.NUM_BATCHES_OF_GENERATED_REPORTS_TO_SAVE_TO_FILE,
+NUM_BATCHES_TO_PROCESS_FOR_LANGUAGE_MODEL_EVALUATION = run_configurations.NUM_BATCHES_TO_PROCESS_FOR_LANGUAGE_MODEL_EVALUATION,
+NUM_IMAGES_TO_PLOT = run_configurations.NUM_IMAGES_TO_PLOT,
+BERTSCORE_SIMILARITY_THRESHOLD = run_configurations.BERTSCORE_SIMILARITY_THRESHOLD,
+WEIGHT_OBJECT_DETECTOR_LOSS = run_configurations.WEIGHT_OBJECT_DETECTOR_LOSS,
+WEIGHT_BINARY_CLASSIFIER_REGION_SELECTION_LOSS = run_configurations.WEIGHT_BINARY_CLASSIFIER_REGION_SELECTION_LOSS,
+WEIGHT_BINARY_CLASSIFIER_REGION_ABNORMAL_LOSS = run_configurations.WEIGHT_BINARY_CLASSIFIER_REGION_ABNORMAL_LOSS,
+WEIGHT_LANGUAGE_MODEL_LOSS = run_configurations.WEIGHT_LANGUAGE_MODEL_LOSS,
+
+
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -59,10 +104,10 @@ logging.basicConfig(level=logging.INFO, format="[%(levelname)s]: %(message)s")
 log = logging.getLogger(__name__)
 
 # set the seed for reproducibility
-random.seed(SEED)
-np.random.seed(SEED)
-torch.manual_seed(SEED)
-torch.cuda.manual_seed_all(SEED)
+random.seed(SEED[0])
+np.random.seed(SEED[0])
+torch.manual_seed(SEED[0])
+torch.cuda.manual_seed_all(SEED[0])
 
 
 def train_model(
