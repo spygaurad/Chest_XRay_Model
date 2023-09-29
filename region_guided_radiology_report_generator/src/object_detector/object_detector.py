@@ -253,6 +253,7 @@ class ObjectDetector(nn.Module):
         if self.return_feature_vectors:
             top_region_features = roi_heads_output["top_region_features"]
             class_detected = roi_heads_output["class_detected"]
+            
 
         losses = {}
         losses.update(detector_losses)

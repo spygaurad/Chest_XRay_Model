@@ -231,7 +231,7 @@ def compute_clinical_efficacy_scores(language_model_scores: dict, gen_reports, r
         return preds_gen_reports, preds_ref_reports
 
     def compute_micro_average_CE_scores(preds_gen_reports, preds_ref_reports):
-        def convert_labels_like_miura(preds_reports: list[list[int]]):
+        def convert_labels_like_miura(preds_reports):
             """
             See doc string of update_clinical_efficacy_scores function for more details.
             Miura (https://arxiv.org/pdf/2010.10042.pdf) considers blank/NaN (label 0) and negative (label 2) to be the negative class,

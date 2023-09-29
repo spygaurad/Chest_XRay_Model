@@ -17,8 +17,23 @@ import torch
 from albumentations.pytorch import ToTensorV2
 from tqdm import tqdm
 
-from report_generation_model import ReportGenerationModel
-from train_full_model import get_tokenizer
+import importlib.util
+
+# Define the file paths for the modules
+report_generation_model_path = '/home/wiseyak/saumya/Chest_XRay_Model/region_guided_radiology_report_generator/src/full_model/report_generation_model.py'
+train_full_model_path = '/home/wiseyak/saumya/Chest_XRay_Model/region_guided_radiology_report_generator/src/full_model/train_full_model.py'
+
+report_generation_model_module = importlib.util.spec_from_file_location('report_generation_model', report_generation_model_path)
+report_generation_model = importlib.util.module_from_spec(report_generation_model_module)
+report_generation_model_module.loader.exec_module(report_generation_model)
+
+train_full_model_module = importlib.util.spec_from_file_location('train_full_model', train_full_model_path)
+train_full_model = importlib.util.module_from_spec(train_full_model_module)
+train_full_model_module.loader.exec_module(train_full_model)
+
+
+ReportGenerationModel = report_generation_model.ReportGenerationModel
+get_tokenizer = train_full_model.get_tokenizer
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -127,9 +142,8 @@ def get_report_for_image(model, image_tensor, tokenizer, bert_score, sentence_to
 
 
 def get_image_tensor(image_path):
-    # cv2.imread by default loads an image with 3 channels
-    # since we have grayscale images, we only have 1 channel and thus use cv2.IMREAD_UNCHANGED to read in the 1 channel
-    image = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)  # shape (3056, 2544)
+    
+    image = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
 
     val_test_transforms = A.Compose(
         [
@@ -153,17 +167,12 @@ def get_model(checkpoint_path):
         map_location=torch.device("cpu"),
     )
 
-    # if there is a key error when loading checkpoint, try uncommenting down below
-    # since depending on the torch version, the state dicts may be different
-    # checkpoint["model"]["object_detector.rpn.head.conv.weight"] = checkpoint["model"].pop("object_detector.rpn.head.conv.0.0.weight")
-    # checkpoint["model"]["object_detector.rpn.head.conv.bias"] = checkpoint["model"].pop("object_detector.rpn.head.conv.0.0.bias")
     model = ReportGenerationModel(pretrain_without_lm_model=True)
     model.load_state_dict(checkpoint["model"])
     model.to(device, non_blocking=True)
     model.eval()
 
     del checkpoint
-
     return model
 
 
@@ -175,7 +184,7 @@ def main():
 
     # paths to the images that we want to generate reports for
     images_paths = [
-        "/home/wiseyak/saumya/Chest_XRay_Model/Imgs/view1_frontal.jpg",
+        "/home/wiseyak/saumya/Chest_XRay_Model/Imgs/abnormal.jpg",
         # ".../___.jpg",
         # ".../___.jpg",
     ]
@@ -199,5 +208,76 @@ def main():
     write_generated_reports_to_txt(images_paths, generated_reports, generated_reports_txt_path)
 
 
-if __name__ == "__main__":
-    main()
+
+# main()
+
+
+'''#Model is loaded per instance called
+def infer(image):
+    import time
+    checkpoint_path = "/home/wiseyak/saumya/Chest_XRay_Model/region_guided_radiology_report_generator/full_model_checkpoint_val_loss_19.793_overall_steps_155252.pt"
+    model = get_model(checkpoint_path)
+    bert_score = evaluate.load("bertscore")
+    sentence_tokenizer = spacy.load("en_core_web_trf")
+    tokenizer = get_tokenizer()
+
+    start_time = time.time()  # Record the start time
+    generated_report = get_report_for_image(model, image, tokenizer, bert_score, sentence_tokenizer)
+    end_time = time.time()  # Record the end time
+    elapsed_time = end_time - start_time  # Calculate elapsed time
+
+    return generated_report, elapsed_time
+'''
+
+
+''' #UModel is loaded once
+
+import time
+checkpoint_path = "/home/wiseyak/saumya/Chest_XRay_Model/region_guided_radiology_report_generator/full_model_checkpoint_val_loss_19.793_overall_steps_155252.pt"
+model = get_model(checkpoint_path)
+bert_score = evaluate.load("bertscore")
+sentence_tokenizer = spacy.load("en_core_web_trf")
+tokenizer = get_tokenizer()
+
+from flask import Flask, request, jsonify
+import os
+app = Flask(__name__)
+
+@app.route('/generate_report', methods=['POST'])
+def generate_report():
+    try:
+        # Check if an image file is included in the request
+        if 'image' not in request.files:
+            return jsonify({'error': 'No image file provided'})
+
+        image_file = request.files['image']
+
+        # Create a temporary file to save the image
+        temp_image_path = 'temp_image.jpg'
+        image_file.save(temp_image_path)
+
+        # Get the image tensor
+        image_tensor = get_image_tensor(temp_image_path)
+
+        # Call the infer function to generate the report
+
+        start_time = time.time()  # Record the start time
+        generated_report = get_report_for_image(model, image_tensor, tokenizer, bert_score, sentence_tokenizer)
+        end_time = time.time()  # Record the start time
+        elapsed_time = end_time-start_time
+
+        # Remove the temporary image file
+        os.remove(temp_image_path)
+
+        response = {
+            'generated_report': generated_report,
+            'time_taken': elapsed_time,
+        }
+        # Return the generated report as a JSON response
+        return jsonify(response)
+    except Exception as e:
+        return jsonify({'error': str(e)})
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
+'''

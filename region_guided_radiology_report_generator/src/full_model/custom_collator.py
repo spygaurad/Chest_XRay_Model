@@ -8,7 +8,7 @@ class CustomCollator:
         self.is_val_or_test = is_val_or_test
         self.pretrain_without_lm_model = pretrain_without_lm_model
 
-    def __call__(self, batch: list[dict[str]]):
+    def __call__(self, batch):
         """
         batch is a list of dicts where each dict corresponds to a single image and has the keys:
           - image
