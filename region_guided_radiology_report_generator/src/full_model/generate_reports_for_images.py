@@ -145,6 +145,9 @@ def get_image_tensor(image_path):
     
     image = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
 
+    if len(image.shape) == 3:
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
     val_test_transforms = A.Compose(
         [
             A.LongestMaxSize(max_size=IMAGE_INPUT_SIZE, interpolation=cv2.INTER_AREA),
@@ -176,7 +179,7 @@ def get_model(checkpoint_path):
     return model
 
 
-def main():
+def test_from_filepath():
     checkpoint_path = "/home/wiseyak/saumya/Chest_XRay_Model/region_guided_radiology_report_generator/full_model_checkpoint_val_loss_19.793_overall_steps_155252.pt"
     model = get_model(checkpoint_path)
 
@@ -184,9 +187,9 @@ def main():
 
     # paths to the images that we want to generate reports for
     images_paths = [
+        "/home/wiseyak/saumya/Chest_XRay_Model/Imgs/normal.jpg",
         "/home/wiseyak/saumya/Chest_XRay_Model/Imgs/abnormal.jpg",
-        # ".../___.jpg",
-        # ".../___.jpg",
+        "/home/wiseyak/saumya/Chest_XRay_Model/Imgs/temp_image.jpg",
     ]
 
     generated_reports_txt_path = "/home/wiseyak/saumya/Chest_XRay_Model/region_guided_radiology_report_generator/report1.txt"
@@ -201,7 +204,7 @@ def main():
     # pip install -U spacy-transformers
 
     for image_path in tqdm(images_paths):
-        image_tensor = get_image_tensor(image_path)  # shape (1, 1, 512, 512)
+        image_tensor = get_image_tensor(image_path) 
         generated_report = get_report_for_image(model, image_tensor, tokenizer, bert_score, sentence_tokenizer)
         generated_reports.append(generated_report)
 
@@ -209,25 +212,7 @@ def main():
 
 
 
-# main()
-
-
-'''#Model is loaded per instance called
-def infer(image):
-    import time
-    checkpoint_path = "/home/wiseyak/saumya/Chest_XRay_Model/region_guided_radiology_report_generator/full_model_checkpoint_val_loss_19.793_overall_steps_155252.pt"
-    model = get_model(checkpoint_path)
-    bert_score = evaluate.load("bertscore")
-    sentence_tokenizer = spacy.load("en_core_web_trf")
-    tokenizer = get_tokenizer()
-
-    start_time = time.time()  # Record the start time
-    generated_report = get_report_for_image(model, image, tokenizer, bert_score, sentence_tokenizer)
-    end_time = time.time()  # Record the end time
-    elapsed_time = end_time - start_time  # Calculate elapsed time
-
-    return generated_report, elapsed_time
-'''
+test_from_filepath()
 
 
 ''' #UModel is loaded once

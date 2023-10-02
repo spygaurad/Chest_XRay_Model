@@ -8,6 +8,7 @@ from tqdm import tqdm as tqdm
 import cv2
 
 from network import DenseNetWithPCAM as DenseNet
+from network import ResNet
 from dataloader import get_dataloaders_and_properties
 from gradcam_fns import gradcam_pcam, overlay_heatmap
 
@@ -32,10 +33,6 @@ threshold = [0.001, 0.2, 0.005, 0.027, 0.07]
 
 def train(lr=1e-4, epoch_decay=2e-3, weight_decay=1e-5, margin=1.0, total_epochs=2, include_class_weights=True):
     
-    
-    #model's properties
-    model = DenseNet()
-    model = model.to(device)
 
     #dataloader
     trainloader, testloader, class_weights, classes = get_dataloaders_and_properties()
@@ -92,7 +89,7 @@ def train(lr=1e-4, epoch_decay=2e-3, weight_decay=1e-5, margin=1.0, total_epochs
 
 
     def save_model(epoch, output_dir):
-        torch.save(model.state_dict(), f'{output_dir}/model_{epoch}.pth')
+        torch.save(model.state_dict(), f'{output_dir}/model_RESNET_{epoch}.pth')
 
 
     def eval_epoch(epoch, idx, loss_fn, output_dir, best_val_auc):
@@ -103,6 +100,7 @@ def train(lr=1e-4, epoch_decay=2e-3, weight_decay=1e-5, margin=1.0, total_epochs
             for jdx, data in enumerate(testloader):
                 test_data, test_labels = data
                 test_data = test_data.to(device)
+                test_data = torch.mean(test_data, dim=1, keepdim=True)
                 y_pred, _, _ = model(test_data)
                 pred_labels = torch.nn.functional.sigmoid(y_pred).cpu().detach().numpy()
                 test_pred.append(pred_labels)
@@ -130,6 +128,7 @@ def train(lr=1e-4, epoch_decay=2e-3, weight_decay=1e-5, margin=1.0, total_epochs
 
             train_data, train_labels  = train_data.to(device), train_labels.to(device)
             optimizer.zero_grad()
+            train_data = torch.mean(train_data, dim=1, keepdim=True)
             y_pred, _, _ = model(train_data)
             loss = loss_fn(y_pred, train_labels)
             optimizer.zero_grad()
@@ -151,32 +150,46 @@ def train(lr=1e-4, epoch_decay=2e-3, weight_decay=1e-5, margin=1.0, total_epochs
         loss_fn = torch.nn.BCEWithLogitsLoss(pos_weight=class_weights.to('cuda'))
     else:
         loss_fn = torch.nn.BCEWithLogitsLoss()
-    optimizer = Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
+    
+
+
     output_dir = f"{base_dir}output_dir/CE/"
 
-    # for epoch in range(5):
-    #     train_epoch(epoch, loss_fn, output_dir)
+    model = ResNet()
+    model = model.to(device)
+    PATH = f'{base_dir}output_dir/CE/model_RESNET_4.pth' 
+    state_dict = torch.load(PATH)
+    model.load_state_dict(state_dict)
+    
+    params = [
+        {"params": model.fc1.parameters(), "lr": lr},
+        {"params": model.fc2.parameters(), "lr": lr},
+        {"params": model.resnet.parameters(), "lr": 1e-7},
+    ]
+    optimizer = Adam(params, weight_decay=weight_decay)
+    for epoch in range(20):
+        train_epoch(epoch, loss_fn, output_dir)
 
     print("Training With Cross Entropy Loss Complete")
 
 
     #load the latest parameters
-    PATH = f'{base_dir}output_dir/CE/model_4.pth' 
-    state_dict = torch.load(PATH)
-    model.load_state_dict(state_dict)
+    # PATH = f'{base_dir}output_dir/CE/model_4.pth' 
+    # state_dict = torch.load(PATH)
+    # model.load_state_dict(state_dict)
 
 
-    # define loss & optimizer
-    loss_fn = mAUCMLoss(num_labels=5)
-    optimizer = PESG(model.parameters(), loss_fn=loss_fn, lr=1e-6, margin=margin, epoch_decay=epoch_decay, weight_decay=weight_decay)
-    output_dir = f"{base_dir}output_dir/auc_max/"
+    # # define loss & optimizer
+    # loss_fn = mAUCMLoss(num_labels=5)
+    # optimizer = PESG(model.parameters(), loss_fn=loss_fn, lr=1e-6, margin=margin, epoch_decay=epoch_decay, weight_decay=weight_decay)
+    # output_dir = f"{base_dir}output_dir/auc_max/"
 
-    for epoch in range(50):
-        train_epoch(epoch, loss_fn, output_dir)
-        # break
+    # for epoch in range(50):
+    #     train_epoch(epoch, loss_fn, output_dir)
+    #     # break
+    # print("Training With mAUCM Loss Complete")
 
-    print("Training With mAUCM Loss Complete")
-
+#initialize an optimizer below
 
 
 def infer_a_sample(image):
@@ -237,4 +250,4 @@ def infer_a_sample(image):
 
 # infer_a_sample()
 # if name == "__main__":
-# train()
+train()

@@ -1,11 +1,15 @@
-Image path: /home/wiseyak/saumya/Chest_XRay_Model/Imgs/view1_frontal.jpg
-Generated report: The lungs are clear. 
-There is no pleural effusion or pneumothorax. 
-The cardiomediastinal silhouette and hilar contours are normal. 
-The mediastinal and hilar contours appear within normal limits.
-There are no acute osseous abnormalities. Heart size is normal. 
-No acute cardiopulmonary abnormality. 
-Right-sided Port-A-Cath tip terminates in the right atrium.
+Image path: /home/wiseyak/saumya/Chest_XRay_Model/Imgs/normal.jpg
+Generated report: The lungs are clear. There is no pleural effusion or pneumothorax. The cardiomediastinal silhouette and hilar contours are normal. The mediastinal and hilar contours appear within normal limits. There are no acute osseous abnormalities. Heart size is normal. No acute cardiopulmonary abnormality. Right-sided Port-A-Cath tip terminates in the right atrium.
+
+==============================
+
+Image path: /home/wiseyak/saumya/Chest_XRay_Model/Imgs/abnormal.jpg
+Generated report: There is no pneumothorax or pleural effusion. There is mild bibasilar atelectasis. There is no pulmonary edema. Endotracheal tube terminates approximately 4.5 cm above the carina. There are no acute osseous abnormalities. The cardiomediastinal silhouette is within normal limits. Moderate cardiomegaly. No free air below the right hemidiaphragm.
+
+==============================
+
+Image path: /home/wiseyak/saumya/Chest_XRay_Model/Imgs/temp_image.jpg
+Generated report: As compared to the previous radiograph, there has been a decrease in the size of the right pleural effusion. The right upper lobe opacity is unchanged. There is no evidence of pneumothorax or pneumomediastinum. Mild pulmonary edema has improved. Upper lungs are clear. In comparison with the study of ___, there is increased opacity in the right upper lobe and left lower lobe. In comparison with the study of ___, there is no significant change in the size of the left hemidiaphragm. There is no focal consolidation, effusion, or pneumothorax. There are no acute osseous abnormalities. The cardiomediastinal silhouette is normal.
 
 ==============================
 
