@@ -212,10 +212,10 @@ def test_from_filepath():
 
 
 
-test_from_filepath()
+# test_from_filepath()
 
 
-''' #UModel is loaded once
+# ''' #UModel is loaded once
 
 import time
 checkpoint_path = "/home/wiseyak/saumya/Chest_XRay_Model/region_guided_radiology_report_generator/full_model_checkpoint_val_loss_19.793_overall_steps_155252.pt"
@@ -265,4 +265,4 @@ def generate_report():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
-'''
+# '''
