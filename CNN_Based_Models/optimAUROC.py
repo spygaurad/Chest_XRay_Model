@@ -196,7 +196,7 @@ def infer_a_sample(image):
     device = 'cpu'
     def load_model():
         model = DenseNet()
-        PATH = f'{base_dir}output_dir/CE/model_1.pth' 
+        PATH = f'{base_dir}output_dir/CE/model_4.pth' 
         state_dict = torch.load(PATH)
         model.load_state_dict(state_dict)
         return model
@@ -250,4 +250,4 @@ def infer_a_sample(image):
 
 # infer_a_sample()
 # if name == "__main__":
-train()
+# train()

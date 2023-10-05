@@ -48,7 +48,7 @@ class ResNet(torch.nn.Module):
         super(ResNet, self).__init__()
         checkpoint_path = "/home/wiseyak/saumya/Chest_XRay_Model/region_guided_radiology_report_generator/full_model_checkpoint_val_loss_19.793_overall_steps_155252.pt"
         model = get_model(checkpoint_path)
-        self.resnet = model.object_detector.backbone
+        self.resnet = model.object_detector
         # for params in self.resnet.parameters():
         #     params.requires_grad = False
         self.avgpool = torch.nn.AdaptiveAvgPool2d((1, 1))
@@ -57,13 +57,14 @@ class ResNet(torch.nn.Module):
         self.fc2 = torch.nn.Linear(512, num_classes)
 
     def forward(self, x):
-        x = self.resnet(x)
-        x = self.avgpool(x)
-        x = x.view(x.size(0), -1)
-        x = self.fc1(x)
-        x = self.relu(x)
-        logits = self.fc2(x)
-        return logits, None, None
+        _, detections, top_region_features, class_detected = self.resnet(x)
+        print("Hello")
+        # x = self.avgpool(x)
+        # x = x.view(x.size(0), -1)
+        # x = self.fc1(x)
+        # x = self.relu(x)
+        # logits = self.fc2(x)
+        # return logits, None, None
 
 image = torch.rand(1, 1, 512, 512).to('cuda')
 model = ResNet().to('cuda')
